@@ -1,6 +1,15 @@
 # Toolkitbox 
 
-A modular Docker image build system using the **Dynamic Injection** pattern for assembling Alpine-based DevOps/SysAdmin toolchain images.
+A modular Docker image build system for DevOps/SysAdmin tools based on Alpine Linux.
+
+## Available Tools
+
+<!-- TOOLS_TABLE_START -->
+| Tool | Versions | Docker Pull |
+|------|----------|-------------|
+| aws-cli | `latest` | `docker pull toolkitbox/aws-cli:latest` |
+| postgres | `latest`, `v11` | `docker pull toolkitbox/postgres:latest` |
+<!-- TOOLS_TABLE_END -->
 
 ## Overview
 This system allows you to dynamically build a "mega image" containing multiple tools without manually editing Dockerfiles. Simply add a new component directory with an `install.sh` script, and the orchestrator automatically includes it in the build.

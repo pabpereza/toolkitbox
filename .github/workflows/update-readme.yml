@@ -1,0 +1,111 @@
+name: Update README
+
+on:
+  # Ejecutar cuando hay cambios en components
+  push:
+    branches:
+      - main
+    paths:
+      - 'components/**'
+  
+  # Permitir ejecución manual
+  workflow_dispatch:
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate tools table
+        id: generate-table
+        run: |
+          echo "Discovering components..."
+          
+          # Crear archivo temporal para la tabla
+          TABLE_FILE=$(mktemp)
+          
+          echo "| Tool | Versions | Docker Pull |" > "$TABLE_FILE"
+          echo "|------|----------|-------------|" >> "$TABLE_FILE"
+          
+          # Iterar sobre cada componente
+          for component_dir in components/*/; do
+            if [ ! -d "$component_dir" ]; then
+              continue
+            fi
+            
+            component=$(basename "$component_dir")
+            versions=()
+            
+            # Verificar si tiene install.sh (latest)
+            if [ -f "$component_dir/install.sh" ]; then
+              versions+=("\`latest\`")
+            fi
+            
+            # Buscar versiones legacy (subcarpetas con Dockerfile)
+            for version_dir in "$component_dir"*/; do
+              if [ -d "$version_dir" ] && [ -f "$version_dir/Dockerfile" ]; then
+                version=$(basename "$version_dir")
+                versions+=("\`$version\`")
+              fi
+            done
+            
+            # Si tiene versiones, añadir a la tabla
+            if [ ${#versions[@]} -gt 0 ]; then
+              versions_str=$(IFS=', '; echo "${versions[*]}")
+              echo "| $component | $versions_str | \`docker pull toolkitbox/$component:latest\` |" >> "$TABLE_FILE"
+            fi
+          done
+          
+          echo "Generated table:"
+          cat "$TABLE_FILE"
+          
+          # Guardar en variable de entorno
+          {
+            echo 'TABLE<<EOF'
+            cat "$TABLE_FILE"
+            echo 'EOF'
+          } >> $GITHUB_OUTPUT
+          
+          rm "$TABLE_FILE"
+
+      - name: Update README
+        run: |
+          # Leer el contenido actual del README
+          README_FILE="README.md"
+          
+          # Crear nuevo contenido con la tabla actualizada
+          awk '
+            /<!-- TOOLS_TABLE_START -->/ {
+              print
+              print "${{ steps.generate-table.outputs.TABLE }}"
+              skip = 1
+              next
+            }
+            /<!-- TOOLS_TABLE_END -->/ {
+              skip = 0
+            }
+            !skip { print }
+          ' "$README_FILE" > README.tmp
+          
+          mv README.tmp "$README_FILE"
+          
+          echo "Updated README:"
+          grep -A 20 "TOOLS_TABLE_START" "$README_FILE"
+
+      - name: Commit changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          if git diff --quiet README.md; then
+            echo "No changes to commit"
+          else
+            git add README.md
+            git commit -m "docs: update tools table [skip ci]"
+            git push
+          fi
