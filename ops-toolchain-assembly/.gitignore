@@ -1,0 +1,2 @@
+# Ignore build context directory used during image assembly
+.build-context/
