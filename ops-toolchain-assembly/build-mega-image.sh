@@ -50,7 +50,7 @@ for component_path in "$COMPONENTS_DIR"/*; do
         chmod +x "$target_script"
         
         echo "  ✓ Found component: $component_name"
-        ((component_count++))
+        component_count=$((component_count + 1))
     else
         echo "  ⊘ Skipping $component_name (no install.sh found)"
     fi
