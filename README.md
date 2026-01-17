@@ -2,13 +2,23 @@
 
 A modular Docker image build system for DevOps/SysAdmin tools based on Alpine Linux.
 
-## Available Tools
+## Available Images
+
+### Bundle Images
+
+<!-- BUNDLE_TABLE_START -->
+| Image | Description | Size | Docker Pull |
+|-------|-------------|------|-------------|
+| all | All tools in one image | - | `docker pull toolkitbox/all:latest` |
+<!-- BUNDLE_TABLE_END -->
+
+### Individual Tools
 
 <!-- TOOLS_TABLE_START -->
-| Tool | Versions | Docker Pull |
-|------|----------|-------------|
-| aws-cli | `latest` | `docker pull toolkitbox/aws-cli:latest` |
-| postgres | `latest`, `v11` | `docker pull toolkitbox/postgres:latest` |
+| Tool | Versions | Size | Docker Pull |
+|------|----------|------|-------------|
+| aws-cli | `latest` | - | `docker pull toolkitbox/aws-cli:latest` |
+| postgres | `latest`, `v11` | - | `docker pull toolkitbox/postgres:latest` |
 <!-- TOOLS_TABLE_END -->
 
 ## Overview
@@ -43,10 +53,10 @@ components/                  # Component library
 
 ## Quick Start
 
-### Building the Mega Image
+### Building the all-in-one Image
 
 ```bash
-./build-mega-image.sh
+./build-all-in-one.sh
 ```
 
 The script will:
@@ -55,11 +65,6 @@ The script will:
 - Copy and rename component installers (e.g., `postgres.sh`, `aws-cli.sh`)
 - Build the Docker image tagged as `ops-toolchain:latest`
 
-### Custom Image Name
-
-```bash
-IMAGE_NAME=my-ops-tools:v1.0 ./build-mega-image.sh
-```
 
 ## Adding New Components
 
@@ -89,145 +94,22 @@ To add a new tool to the mega image:
    EOF
    ```
 
-3. Make it executable:
+3. Rebuild the all-in-one image:
    ```bash
-   chmod +x components/my-tool/install.sh
-   ```
-
-4. Rebuild the mega image:
-   ```bash
-   ./build-mega-image.sh
+   ./build-allinone.sh
    ```
 
 That's it! No Dockerfile editing required.
 
-## Component Guidelines
-
-### install.sh Requirements
-
-- Must be executable (`chmod +x`)
-- Should use `set -e` to fail fast on errors
-- Should use `apk add --no-cache` to minimize image size
-- Should verify installation success
-- Should log progress for debugging
-
-### Example Template
-
-```bash
-#!/bin/bash
-# Component Name Installer for Alpine Linux
-# Brief description of what this installs
-
-set -e
-
-echo "Installing component-name..."
-
-# Install packages
-apk add --no-cache package-name
-
-# Verify installation
-if command -v executable-name > /dev/null 2>&1; then
-    version=$(executable-name --version 2>&1 || echo "installed")
-    echo "Component installed: $version"
-else
-    echo "ERROR: Component installation failed"
-    exit 1
-fi
-
-echo "Component installation complete"
-```
-
-## Legacy Versions
-
-Components can maintain legacy versions in subdirectories (e.g., `v11-legacy/`). These are **not** automatically included in the mega image but can be built independently:
-
-```bash
-cd components/postgres/v11-legacy
-docker build -t postgres:11-legacy .
-```
-
-## Base Image Details
-
-- **Base**: `alpine:latest`
-- **Pre-installed**: bash, curl, ca-certificates
-- **Default Shell**: `/bin/bash`
-- **Default CMD**: `/bin/bash`
-
-## Benefits
-
-- **Modularity**: Each component is self-contained
-- **Flexibility**: Easy to add, remove, or update components
-- **Maintainability**: No central Dockerfile to maintain
-- **Reusability**: Components can be used in different combinations
-- **Version Control**: Easy to track changes per component
-- **CI/CD Friendly**: Automated discovery works in pipelines
-
-## Advanced Usage
-
-### Conditional Builds
-
-You can conditionally include components by temporarily removing their `install.sh`:
-
-```bash
-mv components/aws-cli/install.sh components/aws-cli/install.sh.disabled
-./build-mega-image.sh
-mv components/aws-cli/install.sh.disabled components/aws-cli/install.sh
-```
-
-### Multi-Stage Builds
-
-For components requiring build tools, create an `install.sh` that uses temporary packages:
-
-```bash
-#!/bin/bash
-set -e
-
-# Install build dependencies temporarily
-apk add --no-cache --virtual .build-deps gcc musl-dev
-
-# Build and install
-# ... your build commands ...
-
-# Remove build dependencies
-apk del .build-deps
-```
-
-## Troubleshooting
-
-### Component Not Found
-
-If a component isn't being included:
-- Verify `install.sh` exists in the component's root directory
-- Check that `install.sh` is executable (`ls -l components/*/install.sh`)
-- Ensure there are no syntax errors in `install.sh`
-
-### Build Failures
-
-If the Docker build fails:
-- Check the component's `install.sh` for errors
-- Verify package names are correct for Alpine Linux
-- Review Docker build logs for specific error messages
-- Test the `install.sh` script in an Alpine container manually
-
-### Network Issues
-
-If package downloads fail:
-- Check internet connectivity
-- Verify Alpine repository mirrors are accessible
-- Consider using a local Alpine mirror
-
 ## Contributing
-
 When adding new components:
 1. Follow the component guidelines above
 2. Test the installation script in isolation first
-3. Verify the mega image builds successfully
+3. Verify the individual and all-in-one image builds successfully
 4. Update documentation if adding complex components
-
-## License
-
-This infrastructure is designed for enterprise use and follows DevOps best practices.
 
 ## Author
 
-Created by Senior DevOps Engineer / Container Architect
+Created and maintained by:
+- Fermín Jiménez ([@Rimander](https://github.com/Rimander))
+- Pablo Pérez-Aradros ([@pabpereza](https://github.com/pabpereza))

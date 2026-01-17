@@ -1,12 +1,13 @@
 name: Update README
 
 on:
-  # Ejecutar cuando hay cambios en components
-  push:
+  # Ejecutar después de los builds
+  workflow_run:
+    workflows: ["Build All-in-One Image", "Build Single Images"]
+    types:
+      - completed
     branches:
       - main
-    paths:
-      - 'components/**'
   
   # Permitir ejecución manual
   workflow_dispatch:
@@ -21,18 +22,87 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Generate tools table
-        id: generate-table
+      - name: Get image sizes from Docker Hub
+        id: get-sizes
         run: |
-          echo "Discovering components..."
+          get_image_size() {
+            local image=$1
+            local tag=$2
+            
+            # Obtener token anónimo
+            TOKEN=$(curl -s "https://auth.docker.io/token?service=registry.docker.io&scope=repository:${image}:pull" | jq -r '.token')
+            
+            if [ "$TOKEN" == "null" ] || [ -z "$TOKEN" ]; then
+              echo "-"
+              return
+            fi
+            
+            # Obtener manifesto
+            MANIFEST=$(curl -s -H "Authorization: Bearer $TOKEN" \
+              -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+              "https://registry-1.docker.io/v2/${image}/manifests/${tag}" 2>/dev/null)
+            
+            # Calcular tamaño total
+            SIZE=$(echo "$MANIFEST" | jq '[.config.size, .layers[].size] | add' 2>/dev/null)
+            
+            if [ "$SIZE" == "null" ] || [ -z "$SIZE" ]; then
+              echo "-"
+            else
+              # Convertir a MB
+              SIZE_MB=$(echo "scale=1; $SIZE / 1024 / 1024" | bc)
+              echo "${SIZE_MB} MB"
+            fi
+          }
           
-          # Crear archivo temporal para la tabla
+          # Guardar tamaños en archivos temporales
+          mkdir -p /tmp/sizes
+          
+          # Tamaño de all-in-one
+          ALL_SIZE=$(get_image_size "toolkitbox/all" "latest")
+          echo "$ALL_SIZE" > /tmp/sizes/all
+          echo "all-in-one size: $ALL_SIZE"
+          
+          # Tamaños de componentes individuales
+          for component_dir in components/*/; do
+            if [ ! -d "$component_dir" ]; then
+              continue
+            fi
+            component=$(basename "$component_dir")
+            SIZE=$(get_image_size "toolkitbox/$component" "latest")
+            echo "$SIZE" > "/tmp/sizes/$component"
+            echo "$component size: $SIZE"
+          done
+
+      - name: Generate bundle table
+        id: generate-bundle-table
+        run: |
+          BUNDLE_FILE=$(mktemp)
+          
+          echo "| Image | Description | Size | Docker Pull |" > "$BUNDLE_FILE"
+          echo "|-------|-------------|------|-------------|" >> "$BUNDLE_FILE"
+          
+          # All-in-one
+          ALL_SIZE=$(cat /tmp/sizes/all 2>/dev/null || echo "-")
+          echo "| all | All tools in one image | $ALL_SIZE | \`docker pull toolkitbox/all:latest\` |" >> "$BUNDLE_FILE"
+          
+          cat "$BUNDLE_FILE"
+          
+          {
+            echo 'BUNDLE_TABLE<<EOF'
+            cat "$BUNDLE_FILE"
+            echo 'EOF'
+          } >> $GITHUB_OUTPUT
+          
+          rm "$BUNDLE_FILE"
+
+      - name: Generate tools table
+        id: generate-tools-table
+        run: |
           TABLE_FILE=$(mktemp)
           
-          echo "| Tool | Versions | Docker Pull |" > "$TABLE_FILE"
-          echo "|------|----------|-------------|" >> "$TABLE_FILE"
+          echo "| Tool | Versions | Size | Docker Pull |" > "$TABLE_FILE"
+          echo "|------|----------|------|-------------|" >> "$TABLE_FILE"
           
-          # Iterar sobre cada componente
           for component_dir in components/*/; do
             if [ ! -d "$component_dir" ]; then
               continue
@@ -41,12 +111,10 @@ jobs:
             component=$(basename "$component_dir")
             versions=()
             
-            # Verificar si tiene install.sh (latest)
             if [ -f "$component_dir/install.sh" ]; then
               versions+=("\`latest\`")
             fi
             
-            # Buscar versiones legacy (subcarpetas con Dockerfile)
             for version_dir in "$component_dir"*/; do
               if [ -d "$version_dir" ] && [ -f "$version_dir/Dockerfile" ]; then
                 version=$(basename "$version_dir")
@@ -54,19 +122,17 @@ jobs:
               fi
             done
             
-            # Si tiene versiones, añadir a la tabla
             if [ ${#versions[@]} -gt 0 ]; then
               versions_str=$(IFS=', '; echo "${versions[*]}")
-              echo "| $component | $versions_str | \`docker pull toolkitbox/$component:latest\` |" >> "$TABLE_FILE"
+              SIZE=$(cat "/tmp/sizes/$component" 2>/dev/null || echo "-")
+              echo "| $component | $versions_str | $SIZE | \`docker pull toolkitbox/$component:latest\` |" >> "$TABLE_FILE"
             fi
           done
           
-          echo "Generated table:"
           cat "$TABLE_FILE"
           
-          # Guardar en variable de entorno
           {
-            echo 'TABLE<<EOF'
+            echo 'TOOLS_TABLE<<EOF'
             cat "$TABLE_FILE"
             echo 'EOF'
           } >> $GITHUB_OUTPUT
@@ -75,27 +141,30 @@ jobs:
 
       - name: Update README
         run: |
-          # Leer el contenido actual del README
           README_FILE="README.md"
           
-          # Crear nuevo contenido con la tabla actualizada
-          awk '
-            /<!-- TOOLS_TABLE_START -->/ {
-              print
-              print "${{ steps.generate-table.outputs.TABLE }}"
-              skip = 1
-              next
-            }
-            /<!-- TOOLS_TABLE_END -->/ {
-              skip = 0
-            }
-            !skip { print }
-          ' "$README_FILE" > README.tmp
+          # Actualizar tabla de bundles
+          cat > /tmp/bundle_table.md << 'BUNDLEEOF'
+          ${{ steps.generate-bundle-table.outputs.BUNDLE_TABLE }}
+          BUNDLEEOF
           
+          sed -n '1,/<!-- BUNDLE_TABLE_START -->/p' "$README_FILE" > README.tmp
+          cat /tmp/bundle_table.md >> README.tmp
+          sed -n '/<!-- BUNDLE_TABLE_END -->/,$p' "$README_FILE" >> README.tmp
+          mv README.tmp "$README_FILE"
+          
+          # Actualizar tabla de tools
+          cat > /tmp/tools_table.md << 'TOOLSEOF'
+          ${{ steps.generate-tools-table.outputs.TOOLS_TABLE }}
+          TOOLSEOF
+          
+          sed -n '1,/<!-- TOOLS_TABLE_START -->/p' "$README_FILE" > README.tmp
+          cat /tmp/tools_table.md >> README.tmp
+          sed -n '/<!-- TOOLS_TABLE_END -->/,$p' "$README_FILE" >> README.tmp
           mv README.tmp "$README_FILE"
           
           echo "Updated README:"
-          grep -A 20 "TOOLS_TABLE_START" "$README_FILE"
+          head -40 "$README_FILE"
 
       - name: Commit changes
         run: |
