@@ -1,0 +1,85 @@
+name: Build Single Images
+
+on:
+  # Ejecutar cada semana (domingos a las 00:00 UTC)
+  schedule:
+    - cron: '0 0 * * 0'
+  
+  # Ejecutar cuando hay cambios en components
+  push:
+    branches:
+      - main
+    paths:
+      - 'components/**'
+  
+  # Permitir ejecución manual
+  workflow_dispatch:
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Discover singleDockerfiles
+        id: set-matrix
+        run: |
+          # Buscar todos los Dockerfiles en subcarpetas de components
+          # Estructura: components/<component>/<version>/Dockerfile
+          images=()
+          
+          for dockerfile in components/*/*/Dockerfile; do
+            if [ -f "$dockerfile" ]; then
+              # Extraer componente y versión del path
+              path=$(dirname "$dockerfile")
+              version=$(basename "$path")
+              component=$(basename $(dirname "$path"))
+              
+              echo "Found: $component:$version"
+              images+=("{\"component\":\"$component\",\"version\":\"$version\",\"dockerfile\":\"$dockerfile\"}")
+            fi
+          done
+          
+          # Construir JSON matrix
+          if [ ${#images[@]} -eq 0 ]; then
+            echo "No legacy Dockerfiles found"
+            echo "matrix={\"include\":[]}" >> $GITHUB_OUTPUT
+          else
+            matrix=$(printf '%s,' "${images[@]}" | sed 's/,$//')
+            echo "matrix={\"include\":[$matrix]}" >> $GITHUB_OUTPUT
+          fi
+
+  build:
+    needs: discover
+    if: ${{ fromJson(needs.discover.outputs.matrix).include[0] != null }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix: ${{ fromJson(needs.discover.outputs.matrix) }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: toolkitbox
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Build and push ${{ matrix.component }}:${{ matrix.version }}
+        uses: docker/build-push-action@v6
+        with:
+          context: components/${{ matrix.component }}/${{ matrix.version }}
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: toolkitbox/${{ matrix.component }}:${{ matrix.version }}
+          cache-from: type=gha,scope=${{ matrix.component }}-${{ matrix.version }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.component }}-${{ matrix.version }}

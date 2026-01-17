@@ -47,7 +47,7 @@ for component_path in "$COMPONENTS_DIR"/*; do
         # Copy installer with component name to avoid collisions
         target_script="$BUILD_CONTEXT_DIR/${component_name}.sh"
         cp "$install_script" "$target_script"
-        chmod +x "$target_script"
+        chmod u+x "$target_script"
         
         echo "  ✓ Found component: $component_name"
         component_count=$((component_count + 1))
