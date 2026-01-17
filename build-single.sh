@@ -20,7 +20,7 @@ fi
 
 echo ">> Construyendo imagen individual para: $COMPONENT:$TAG"
 
-# --- LA PLANTILLA DINÁMICA ---
+# --- DYNAMIC TEMPLATE ---
 # Usamos 'docker build -' para pasar el Dockerfile por stdin sin crear archivos
 cat <<EOF | docker build -t "toolkitbox/$COMPONENT:$TAG" -f - "$DIR"
 FROM alpine:latest
