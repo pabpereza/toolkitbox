@@ -1,6 +1,4 @@
 # Legacy PostgreSQL 11 Image
-# This Dockerfile demonstrates version isolation for legacy tools
-# that require older base images or specific configurations.
 #
 # Base: Alpine Linux 3.10 (for PostgreSQL 11 compatibility)
 

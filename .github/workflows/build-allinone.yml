@@ -1,0 +1,85 @@
+name: Build All-in-One Image
+
+on:
+  # Ejecutar cada semana (domingos a las 00:00 UTC)
+  schedule:
+    - cron: '0 0 * * 0'
+  
+  # Permitir ejecución manual
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: toolkitbox/all
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: toolkitbox
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Prepare build context
+        run: |
+          chmod +x build-allinone.sh
+          
+          # Crear directorio de contexto de build
+          BUILD_CONTEXT_DIR=".build-context"
+          COMPONENTS_DIR="components"
+          
+          rm -rf "$BUILD_CONTEXT_DIR"
+          mkdir -p "$BUILD_CONTEXT_DIR"
+          
+          echo ">> Discovering components..."
+          component_count=0
+          
+          for component_path in "$COMPONENTS_DIR"/*; do
+            if [ ! -d "$component_path" ]; then
+              continue
+            fi
+            
+            component_name=$(basename "$component_path")
+            install_script="$component_path/install.sh"
+            
+            if [ -f "$install_script" ]; then
+              target_script="$BUILD_CONTEXT_DIR/${component_name}.sh"
+              cp "$install_script" "$target_script"
+              chmod +x "$target_script"
+              echo "  ✓ Found component: $component_name"
+              component_count=$((component_count + 1))
+            fi
+          done
+          
+          echo ">> Components discovered: $component_count"
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+            type=raw,value={{date 'YYYYMMDD'}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.bundle
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

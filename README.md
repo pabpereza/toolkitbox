@@ -1,10 +1,11 @@
-# Ops Toolchain Assembly
+# Toolkitbox 
 
 A modular Docker image build system using the **Dynamic Injection** pattern for assembling Alpine-based DevOps/SysAdmin toolchain images.
 
 ## Overview
-
 This system allows you to dynamically build a "mega image" containing multiple tools without manually editing Dockerfiles. Simply add a new component directory with an `install.sh` script, and the orchestrator automatically includes it in the build.
+
+This repository builds an individual image for each component as well, allowing for flexible usage and an all-in-one image.
 
 ## Architecture
 
@@ -20,6 +21,7 @@ The Dynamic Injection pattern works as follows:
 ```
 .gitignore                   # Ignores .build-context directory
 build-mega-image.sh          # Orchestrator script (main entry point)
+build-single.sh              # Script to build individual component images
 Dockerfile.bundle            # Generic Dockerfile for mega image
 components/                  # Component library
 ├── postgres/
