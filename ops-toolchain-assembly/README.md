@@ -31,7 +31,7 @@ ops-toolchain-assembly/
         └── install.sh           # AWS CLI installer
 ```
 
-##  Quick Start
+## Quick Start
 
 ### Building the Mega Image
 
@@ -117,7 +117,7 @@ echo "Installing component-name..."
 apk add --no-cache package-name
 
 # Verify installation
-if command -v executable-name &> /dev/null; then
+if command -v executable-name > /dev/null 2>&1; then
     version=$(executable-name --version 2>&1 || echo "installed")
     echo "Component installed: $version"
 else

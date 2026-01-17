@@ -11,7 +11,7 @@ echo "Installing PostgreSQL client..."
 apk add --no-cache postgresql-client
 
 # Verify installation
-if command -v psql &> /dev/null; then
+if command -v psql > /dev/null 2>&1; then
     psql_version=$(psql --version)
     echo "PostgreSQL client installed: $psql_version"
 else

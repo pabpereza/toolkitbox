@@ -11,7 +11,7 @@ echo "Installing AWS CLI..."
 apk add --no-cache aws-cli
 
 # Verify installation
-if command -v aws &> /dev/null; then
+if command -v aws > /dev/null 2>&1; then
     aws_version=$(aws --version 2>&1)
     echo "AWS CLI installed: $aws_version"
 else
