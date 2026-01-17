@@ -5,6 +5,13 @@ on:
   schedule:
     - cron: '0 0 * * 0'
   
+  # Ejecutar cuando hay cambios en components
+  push:
+    branches:
+      - main
+    paths:
+      - 'components/**'
+  
   # Permitir ejecución manual
   workflow_dispatch:
 
