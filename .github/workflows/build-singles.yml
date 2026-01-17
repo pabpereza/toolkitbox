@@ -24,28 +24,34 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Discover singleDockerfiles
+      - name: Discover all components
         id: set-matrix
         run: |
-          # Buscar todos los Dockerfiles en subcarpetas de components
-          # Estructura: components/<component>/<version>/Dockerfile
           images=()
           
+          # 1. Buscar install.sh para versiones latest
+          for install_script in components/*/install.sh; do
+            if [ -f "$install_script" ]; then
+              component=$(basename $(dirname "$install_script"))
+              echo "Found latest: $component"
+              images+=("{\"component\":\"$component\",\"version\":\"latest\",\"type\":\"install\"}")
+            fi
+          done
+          
+          # 2. Buscar Dockerfiles en subcarpetas para versiones legacy
           for dockerfile in components/*/*/Dockerfile; do
             if [ -f "$dockerfile" ]; then
-              # Extraer componente y versión del path
               path=$(dirname "$dockerfile")
               version=$(basename "$path")
               component=$(basename $(dirname "$path"))
-              
-              echo "Found: $component:$version"
-              images+=("{\"component\":\"$component\",\"version\":\"$version\",\"dockerfile\":\"$dockerfile\"}")
+              echo "Found legacy: $component:$version"
+              images+=("{\"component\":\"$component\",\"version\":\"$version\",\"type\":\"dockerfile\"}")
             fi
           done
           
           # Construir JSON matrix
           if [ ${#images[@]} -eq 0 ]; then
-            echo "No legacy Dockerfiles found"
+            echo "No components found"
             echo "matrix={\"include\":[]}" >> $GITHUB_OUTPUT
           else
             matrix=$(printf '%s,' "${images[@]}" | sed 's/,$//')
@@ -74,11 +80,27 @@ jobs:
           username: toolkitbox
           password: ${{ secrets.DOCKER_TOKEN }}
 
+      # Build para componentes con install.sh (latest)
+      - name: Build and push ${{ matrix.component }}:latest
+        if: matrix.type == 'install'
+        run: |
+          cat <<'EOF' | docker build -t "toolkitbox/${{ matrix.component }}:latest" -f - "components/${{ matrix.component }}"
+          FROM alpine:latest
+          RUN apk add --no-cache bash curl ca-certificates
+          COPY install.sh /tmp/install.sh
+          RUN chmod +x /tmp/install.sh && /tmp/install.sh && rm /tmp/install.sh
+          WORKDIR /root
+          CMD ["/bin/sh"]
+          EOF
+          docker push "toolkitbox/${{ matrix.component }}:latest"
+
+      # Build para componentes legacy con Dockerfile
       - name: Build and push ${{ matrix.component }}:${{ matrix.version }}
+        if: matrix.type == 'dockerfile'
         uses: docker/build-push-action@v6
         with:
           context: components/${{ matrix.component }}/${{ matrix.version }}
-          file: ${{ matrix.dockerfile }}
+          file: components/${{ matrix.component }}/${{ matrix.version }}/Dockerfile
           push: true
           tags: toolkitbox/${{ matrix.component }}:${{ matrix.version }}
           cache-from: type=gha,scope=${{ matrix.component }}-${{ matrix.version }}
