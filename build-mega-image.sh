@@ -9,9 +9,9 @@ set -e
 BUILD_CONTEXT_DIR=".build-context"
 COMPONENTS_DIR="components"
 DOCKERFILE="Dockerfile.bundle"
-IMAGE_NAME="${IMAGE_NAME:-ops-toolchain:latest}"
+IMAGE_NAME="toolkitbox/all:latest"
 
-echo "=== Ops Toolchain Assembly Builder ==="
+echo "=== Toolkitbox Builder ==="
 echo "Starting dynamic component discovery..."
 
 # Clean and recreate build context directory
