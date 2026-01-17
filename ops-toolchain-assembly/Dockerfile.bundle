@@ -1,0 +1,44 @@
+# Ops Toolchain Mega Image
+# This Dockerfile dynamically installs all discovered components
+# using the Dynamic Injection pattern.
+#
+# Base: Alpine Linux (latest)
+# Pattern: Dynamic component installation from build context
+
+FROM alpine:latest
+
+# Set working directory
+WORKDIR /root
+
+# Install base dependencies required by most components
+# These are minimal utilities needed for component installers
+RUN apk add --no-cache \
+    bash \
+    curl \
+    ca-certificates \
+    && rm -rf /var/cache/apk/*
+
+# Copy all component installers from build context
+COPY .build-context /tmp/installers
+
+# Execute all component installers dynamically
+# This loop processes each .sh file found in the installers directory
+RUN set -e && \
+    echo "=== Installing Components ===" && \
+    for installer in /tmp/installers/*.sh; do \
+        if [ -f "$installer" ]; then \
+            component_name=$(basename "$installer" .sh); \
+            echo "Installing component: $component_name"; \
+            chmod +x "$installer"; \
+            "$installer" || { echo "Failed to install $component_name"; exit 1; }; \
+            echo "✓ $component_name installed successfully"; \
+        fi; \
+    done && \
+    echo "=== Component Installation Complete ===" && \
+    rm -rf /tmp/installers
+
+# Set default shell to bash for better user experience
+SHELL ["/bin/bash", "-c"]
+
+# Default command
+CMD ["/bin/bash"]
