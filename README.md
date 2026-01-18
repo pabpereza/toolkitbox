@@ -17,8 +17,8 @@ A modular Docker image build system for DevOps/SysAdmin tools based on Alpine Li
 <!-- TOOLS_TABLE_START -->
 | Tool | Versions | Size | Docker Pull |
 |------|----------|------|-------------|
-| aws-cli | `latest` | - | `docker pull toolkitbox/aws-cli:latest` |
-| postgres | `latest`, `v11` | - | `docker pull toolkitbox/postgres:latest` |
+| aws-cli | `latest` | 45.3 MB | `docker pull toolkitbox/aws-cli:latest` |
+| postgres | `latest`,`v11` | 8.7 MB | `docker pull toolkitbox/postgres:latest` |
 <!-- TOOLS_TABLE_END -->
 
 ## Overview
