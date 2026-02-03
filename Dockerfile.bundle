@@ -1,4 +1,4 @@
-# Ops Toolchain Mega Image
+# Toolkitbox Mega Image
 # This Dockerfile dynamically installs all discovered components
 # using the Dynamic Injection pattern.
 #

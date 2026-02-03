@@ -36,20 +36,68 @@ ops-toolchain-assembly/
 
 When asked to add a new tool, you must create a shell script, not a Dockerfile.
 
-1. **Shebang:** Must be `#!/bin/sh` (Alpine standard).
-2. **Error Handling:** Must start with `set -e`.
-3. **Package Manager:** Use `apk add --no-cache`. Never leave cache files.
-4. **Idempotency:** The script should assume it runs in a clean `alpine:latest` environment.
-5. **Logging:** Include simple echo steps: `echo ">> Installing [Tool]..."`.
+#### Mandatory Structure
 
-**Example:**
+Every `install.sh` must follow this exact structure:
 
 ```bash
 #!/bin/sh
+# [Tool Name] - Brief description of what it installs
 set -e
-echo ">> Installing Redis..."
-apk add --no-cache redis
 
+echo ">> Installing [Tool Name]..."
+apk add --no-cache [package-name]
+```
+
+#### Format Rules
+
+1. **Shebang:** Must be `#!/bin/sh` (Alpine standard, NOT `#!/bin/bash`).
+2. **Comment Header:** Second line must be `# [Tool Name] - Brief description`.
+3. **Error Handling:** Must have `set -e` immediately after comment.
+4. **Logging:** Use `echo ">> ..."` prefix for all log messages.
+5. **Package Manager:** Use `apk add --no-cache`. Never leave cache files.
+6. **Cleanup:** If downloading external files, always cleanup with `rm -rf /tmp/*`.
+
+#### Example: Simple APK Install
+
+```bash
+#!/bin/sh
+# Redis Client - Installs Redis CLI tools
+set -e
+
+echo ">> Installing Redis Client..."
+apk add --no-cache redis
+```
+
+#### Example: External Download (when APK unavailable)
+
+```bash
+#!/bin/sh
+# MongoDB Client - Installs MongoDB Shell (mongosh)
+set -e
+
+VERSION="2.3.0"
+
+echo ">> Installing MongoDB Client..."
+apk add --no-cache curl
+
+# Detect architecture
+ARCH=$(uname -m)
+case "$ARCH" in
+    x86_64)  ARCH_NAME="x64" ;;
+    aarch64) ARCH_NAME="arm64" ;;
+    *)       echo ">> ERROR: Unsupported architecture: $ARCH"; exit 1 ;;
+esac
+
+# Download and install
+echo ">> Downloading mongosh ${VERSION}..."
+curl -fsSL "https://example.com/tool-${VERSION}-${ARCH_NAME}.tgz" -o /tmp/tool.tgz
+tar -xzf /tmp/tool.tgz -C /tmp
+cp /tmp/tool-*/bin/tool /usr/local/bin/
+chmod +x /usr/local/bin/tool
+
+# Cleanup
+rm -rf /tmp/tool*
 ```
 
 ### B. The Legacy Standard (For Old Versions)
