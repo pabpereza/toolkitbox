@@ -1,7 +1,7 @@
 name: Build Single Images
 
 on:
-  # Ejecutar cada semana (domingos a las 00:00 UTC)
+  # Ejecutar cada semana (domingos a las 00:00 UTC) - construye todo
   schedule:
     - cron: '0 0 * * 0'
   
@@ -12,8 +12,14 @@ on:
     paths:
       - 'components/**'
   
-  # Permitir ejecución manual
+  # Permitir ejecución manual con opción de forzar todo
   workflow_dispatch:
+    inputs:
+      build_all:
+        description: 'Construir todas las imágenes (ignorar cambios)'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   discover:
@@ -23,18 +29,55 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Necesario para comparar commits
 
-      - name: Discover all components
+      - name: Detect changed components
         id: set-matrix
         run: |
           images=()
+          
+          # Determinar si construir todo o solo cambios
+          BUILD_ALL="${{ github.event.inputs.build_all || 'false' }}"
+          
+          # En schedule siempre construir todo
+          if [ "${{ github.event_name }}" == "schedule" ]; then
+            BUILD_ALL="true"
+          fi
+          
+          echo "Build all: $BUILD_ALL"
+          
+          # Obtener archivos cambiados (solo en push)
+          if [ "$BUILD_ALL" == "false" ] && [ "${{ github.event_name }}" == "push" ]; then
+            # Comparar con el commit anterior
+            CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} 2>/dev/null || git diff --name-only HEAD~1 HEAD)
+            echo "Changed files:"
+            echo "$CHANGED_FILES"
+          else
+            CHANGED_FILES=""
+          fi
+          
+          # Función para verificar si un componente tiene cambios
+          has_changes() {
+            local component_path="$1"
+            if [ "$BUILD_ALL" == "true" ] || [ -z "$CHANGED_FILES" ]; then
+              return 0  # Construir
+            fi
+            echo "$CHANGED_FILES" | grep -q "^${component_path}" && return 0 || return 1
+          }
           
           # 1. Buscar install.sh para versiones latest
           for install_script in components/*/install.sh; do
             if [ -f "$install_script" ]; then
               component=$(basename $(dirname "$install_script"))
-              echo "Found latest: $component"
-              images+=("{\"component\":\"$component\",\"version\":\"latest\",\"type\":\"install\"}")
+              component_path="components/$component/"
+              
+              if has_changes "$component_path"; then
+                echo "✓ Build latest: $component (changed)"
+                images+=("{\"component\":\"$component\",\"version\":\"latest\",\"type\":\"install\"}")
+              else
+                echo "✗ Skip latest: $component (no changes)"
+              fi
             fi
           done
           
@@ -44,18 +87,26 @@ jobs:
               path=$(dirname "$dockerfile")
               version=$(basename "$path")
               component=$(basename $(dirname "$path"))
-              echo "Found legacy: $component:$version"
-              images+=("{\"component\":\"$component\",\"version\":\"$version\",\"type\":\"dockerfile\"}")
+              component_path="components/$component/$version/"
+              
+              if has_changes "$component_path"; then
+                echo "✓ Build legacy: $component:$version (changed)"
+                images+=("{\"component\":\"$component\",\"version\":\"$version\",\"type\":\"dockerfile\"}")
+              else
+                echo "✗ Skip legacy: $component:$version (no changes)"
+              fi
             fi
           done
           
           # Construir JSON matrix
           if [ ${#images[@]} -eq 0 ]; then
-            echo "No components found"
+            echo "No components to build"
             echo "matrix={\"include\":[]}" >> $GITHUB_OUTPUT
           else
             matrix=$(printf '%s,' "${images[@]}" | sed 's/,$//')
             echo "matrix={\"include\":[$matrix]}" >> $GITHUB_OUTPUT
+            echo ""
+            echo "Components to build: ${#images[@]}"
           fi
 
   build:
