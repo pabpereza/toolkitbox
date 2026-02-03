@@ -1,24 +1,23 @@
 # Legacy MongoDB 4.4 Client Image
 #
-# Base: Debian Slim (MongoDB shell requires glibc)
-# Note: Alpine uses musl, MongoDB binaries require glibc
+# Base: Official MongoDB 4.4 image (extracts only the shell)
+# Note: Using multi-stage to get only mongo shell binary
 
-FROM debian:buster-slim
+FROM mongo:4.4 AS source
 
-ENV MONGO_VERSION=4.4
+FROM debian:bullseye-slim
 
-# Install MongoDB 4.4 shell
+# Copy MongoDB shell from official image
+COPY --from=source /usr/bin/mongo /usr/bin/mongo
+COPY --from=source /usr/bin/mongodump /usr/bin/mongodump
+COPY --from=source /usr/bin/mongorestore /usr/bin/mongorestore
+COPY --from=source /usr/bin/mongoexport /usr/bin/mongoexport
+COPY --from=source /usr/bin/mongoimport /usr/bin/mongoimport
+
+# Install required libraries
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    gnupg \
-    curl \
-    ca-certificates \
-    && curl -fsSL https://pgp.mongodb.com/server-${MONGO_VERSION}.asc | gpg --dearmor -o /usr/share/keyrings/mongodb-server-${MONGO_VERSION}.gpg \
-    && echo "deb [ signed-by=/usr/share/keyrings/mongodb-server-${MONGO_VERSION}.gpg ] http://repo.mongodb.org/apt/debian buster/mongodb-org/${MONGO_VERSION} main" | tee /etc/apt/sources.list.d/mongodb-org-${MONGO_VERSION}.list \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends \
-    mongodb-org-shell \
-    && apt-get purge -y gnupg \
-    && apt-get autoremove -y \
+    libcurl4 \
+    libssl1.1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Verify installation

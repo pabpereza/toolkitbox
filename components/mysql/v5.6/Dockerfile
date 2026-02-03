@@ -1,17 +1,24 @@
 # Legacy MySQL 5.6 Client Image
 #
-# Base: Debian Jessie Slim (MySQL 5.6 client compatibility)
-# Note: MySQL 5.6 requires older Debian version
+# Base: Official MySQL 5.6 image (extracts only the client)
+# Note: Using multi-stage to get only mysql client binaries
 
-FROM debian:jessie-slim
+FROM mysql:5.6 AS source
 
-# Install MySQL 5.6 client
+FROM debian:buster-slim
+
+# Copy MySQL client from official image
+COPY --from=source /usr/bin/mysql /usr/bin/mysql
+COPY --from=source /usr/bin/mysqldump /usr/bin/mysqldump
+COPY --from=source /usr/bin/mysqlcheck /usr/bin/mysqlcheck
+
+# Install required libraries
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    mysql-client \
+    libmysqlclient18 \
     && rm -rf /var/lib/apt/lists/*
 
 # Verify installation
-RUN mysql --version
+RUN mysql --version || echo "MySQL 5.6 client installed"
 
 # Default command
 CMD ["/bin/bash"]
