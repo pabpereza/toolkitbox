@@ -10,11 +10,9 @@ A modular Docker image build system for DevOps/SysAdmin tools and clients. You c
 ### Bundle Images
 
 <!-- BUNDLE_TABLE_START -->
-| Image | Description | Components | Docker Pull | Badges |
-|-------|-------------|------------|-------------|--------|
-| all | All tools in one image | all components | `docker pull toolkitbox/all` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/all?logo=docker)](https://hub.docker.com/r/toolkitbox/all) |
-| cloud | Cloud Bundle | aws-cli, azure-cli, gcloud | `docker pull toolkitbox/cloud` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/cloud?logo=docker)](https://hub.docker.com/r/toolkitbox/cloud) |
-| databases | Databases Bundle | postgres, mysql, mariadb, mongo, redis | `docker pull toolkitbox/databases` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/databases?logo=docker)](https://hub.docker.com/r/toolkitbox/databases) |
+| Image | Description | Components | Size | Docker Pull | Badges |
+|-------|-------------|------------|------|-------------|--------|
+| all | All tools in one image | all components | 339.9 MB | `docker pull toolkitbox/all` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/all?logo=docker)](https://hub.docker.com/r/toolkitbox/all) |
 <!-- BUNDLE_TABLE_END -->
 
 ### Individual Tools
