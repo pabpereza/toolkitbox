@@ -1,5 +1,8 @@
 # MySQL Client
 
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/pabpereza/toolkitbox)
+[![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/mysql?logo=docker)](https://hub.docker.com/r/toolkitbox/mysql)
+
 Command line client for MySQL.
 
 ## Quick Start

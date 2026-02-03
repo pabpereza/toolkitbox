@@ -148,6 +148,9 @@ Every component in `components/[tool-name]/` must have a `README.md` file in Eng
 ```markdown
 # [Tool Name]
 
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/pabpereza/toolkitbox)
+[![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/[tool-name]?logo=docker)](https://hub.docker.com/r/toolkitbox/[tool-name])
+
 One-line description of the tool.
 
 ## Quick Start
@@ -213,9 +216,10 @@ Links to official docs.
 
 ### Key Rules
 
-1. **Quick Start First:** Docker and Kubernetes examples MUST be the first sections after the title.
-2. **Image Registry:** Always use `ghcr.io/pabpereza/toolkitbox/[tool-name]:latest`.
-3. **Separator:** Use `---` to separate Quick Start from detailed documentation.
-4. **Language:** All documentation must be in English.
-5. **Kubernetes Examples:** Always include a Pod manifest with `sleep infinity` for debugging and environment variables using Secrets.
-6. **Docker Examples:** Include both interactive mode and single command execution.
+1. **Badges:** Include GitHub repository badge and Docker Hub pulls badge immediately after the title.
+2. **Quick Start First:** Docker and Kubernetes examples MUST be the first sections after the badges and description.
+3. **Image Registry:** Always use `ghcr.io/pabpereza/toolkitbox/[tool-name]:latest`.
+4. **Separator:** Use `---` to separate Quick Start from detailed documentation.
+5. **Language:** All documentation must be in English.
+6. **Kubernetes Examples:** Always include a Pod manifest with `sleep infinity` for debugging and environment variables using Secrets.
+7. **Docker Examples:** Include both interactive mode and single command execution.

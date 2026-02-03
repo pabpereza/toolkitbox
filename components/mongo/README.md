@@ -1,5 +1,8 @@
 # MongoDB Client (mongosh)
 
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/pabpereza/toolkitbox)
+[![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/mongo?logo=docker)](https://hub.docker.com/r/toolkitbox/mongo)
+
 Modern MongoDB shell for interacting with MongoDB databases.
 
 ## Quick Start

@@ -1,5 +1,8 @@
 # MariaDB Client
 
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/pabpereza/toolkitbox)
+[![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/mariadb?logo=docker)](https://hub.docker.com/r/toolkitbox/mariadb)
+
 Command line client for MariaDB/MySQL.
 
 ## Quick Start

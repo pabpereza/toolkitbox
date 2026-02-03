@@ -86,12 +86,13 @@ jobs:
         run: |
           BUNDLE_FILE=$(mktemp)
           
-          echo "| Image | Description | Size | Docker Pull |" > "$BUNDLE_FILE"
-          echo "|-------|-------------|------|-------------|" >> "$BUNDLE_FILE"
+          echo "| Image | Description | Size | Docker Pull | Badges |" > "$BUNDLE_FILE"
+          echo "|-------|-------------|------|-------------|--------|" >> "$BUNDLE_FILE"
           
           # All-in-one
           ALL_SIZE=$(cat /tmp/sizes/all 2>/dev/null || echo "-")
-          echo "| all | All tools in one image | $ALL_SIZE | \`docker pull toolkitbox/all\` |" >> "$BUNDLE_FILE"
+          BADGE="[![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/all?logo=docker)](https://hub.docker.com/r/toolkitbox/all)"
+          echo "| all | All tools in one image | $ALL_SIZE | \`docker pull toolkitbox/all\` | $BADGE |" >> "$BUNDLE_FILE"
           
           cat "$BUNDLE_FILE"
           
@@ -108,8 +109,8 @@ jobs:
         run: |
           TABLE_FILE=$(mktemp)
           
-          echo "| Tool | Versions | Size | Docker Pull |" > "$TABLE_FILE"
-          echo "|------|----------|------|-------------|" >> "$TABLE_FILE"
+          echo "| Tool | Versions | Size | Docker Pull | Badges |" > "$TABLE_FILE"
+          echo "|------|----------|------|-------------|--------|" >> "$TABLE_FILE"
           
           for component_dir in components/*/; do
             if [ ! -d "$component_dir" ]; then
@@ -133,7 +134,8 @@ jobs:
             if [ ${#versions[@]} -gt 0 ]; then
               versions_str=$(IFS=', '; echo "${versions[*]}")
               SIZE=$(cat "/tmp/sizes/$component" 2>/dev/null || echo "-")
-              echo "| $component | $versions_str | $SIZE | \`docker pull toolkitbox/$component\` |" >> "$TABLE_FILE"
+              BADGE="[![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/$component?logo=docker)](https://hub.docker.com/r/toolkitbox/$component)"
+              echo "| $component | $versions_str | $SIZE | \`docker pull toolkitbox/$component\` | $BADGE |" >> "$TABLE_FILE"
             fi
           done
           
