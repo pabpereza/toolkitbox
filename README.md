@@ -12,7 +12,7 @@ A modular Docker image build system for DevOps/SysAdmin tools based on Alpine Li
 <!-- BUNDLE_TABLE_START -->
 | Image | Description | Size | Docker Pull | Badges |
 |-------|-------------|------|-------------|--------|
-| all | All tools in one image | 103.9 MB | `docker pull toolkitbox/all` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/all?logo=docker)](https://hub.docker.com/r/toolkitbox/all) |
+| all | All tools in one image | 339.9 MB | `docker pull toolkitbox/all` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/all?logo=docker)](https://hub.docker.com/r/toolkitbox/all) |
 <!-- BUNDLE_TABLE_END -->
 
 ### Individual Tools
