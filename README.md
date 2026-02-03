@@ -13,8 +13,8 @@ A modular Docker image build system for DevOps/SysAdmin tools based on Alpine Li
 | Image | Description | Components | Docker Pull | Badges |
 |-------|-------------|------------|-------------|--------|
 | all | All tools in one image | all components | `docker pull toolkitbox/all` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/all?logo=docker)](https://hub.docker.com/r/toolkitbox/all) |
-| cloud | Cloud provider CLI tools | aws-cli, azure-cli, gcloud | `docker pull toolkitbox/cloud` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/cloud?logo=docker)](https://hub.docker.com/r/toolkitbox/cloud) |
-| databases | Database client tools | postgres, mysql, mariadb, mongo, redis | `docker pull toolkitbox/databases` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/databases?logo=docker)](https://hub.docker.com/r/toolkitbox/databases) |
+| cloud | Cloud Bundle | aws-cli, azure-cli, gcloud | `docker pull toolkitbox/cloud` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/cloud?logo=docker)](https://hub.docker.com/r/toolkitbox/cloud) |
+| databases | Databases Bundle | postgres, mysql, mariadb, mongo, redis | `docker pull toolkitbox/databases` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/databases?logo=docker)](https://hub.docker.com/r/toolkitbox/databases) |
 <!-- BUNDLE_TABLE_END -->
 
 ### Individual Tools
