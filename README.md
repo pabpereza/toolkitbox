@@ -10,22 +10,22 @@ A modular Docker image build system for DevOps/SysAdmin tools based on Alpine Li
 ### Bundle Images
 
 <!-- BUNDLE_TABLE_START -->
-| Image | Description | Size | Docker Pull |
-|-------|-------------|------|-------------|
-| all | All tools in one image | 103.9 MB | `docker pull toolkitbox/all` |
+| Image | Description | Size | Docker Pull | Badges |
+|-------|-------------|------|-------------|--------|
+| all | All tools in one image | 103.9 MB | `docker pull toolkitbox/all` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/all?logo=docker)](https://hub.docker.com/r/toolkitbox/all) |
 <!-- BUNDLE_TABLE_END -->
 
 ### Individual Tools
 
 <!-- TOOLS_TABLE_START -->
-| Tool | Versions | Size | Docker Pull |
-|------|----------|------|-------------|
-| aws-cli | `latest`,`v1` | 45.3 MB | `docker pull toolkitbox/aws-cli` |
-| mariadb | `latest`,`v10.3`,`v10.4` | 17.2 MB | `docker pull toolkitbox/mariadb` |
-| mongo | `latest`,`v3.6`,`v4.4` | 53.2 MB | `docker pull toolkitbox/mongo` |
-| mysql | `latest`,`v5.6`,`v5.7` | 17.2 MB | `docker pull toolkitbox/mysql` |
-| postgres | `latest`,`v10`,`v11`,`v9.6` | 8.7 MB | `docker pull toolkitbox/postgres` |
-| redis | `latest`,`v4`,`v5` | 9.9 MB | `docker pull toolkitbox/redis` |
+| Tool | Versions | Size | Docker Pull | Badges |
+|------|----------|------|-------------|--------|
+| aws-cli | `latest`,`v1` | 45.3 MB | `docker pull toolkitbox/aws-cli` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/aws-cli?logo=docker)](https://hub.docker.com/r/toolkitbox/aws-cli) |
+| mariadb | `latest`,`v10.3`,`v10.4` | 17.2 MB | `docker pull toolkitbox/mariadb` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/mariadb?logo=docker)](https://hub.docker.com/r/toolkitbox/mariadb) |
+| mongo | `latest`,`v3.6`,`v4.4` | 53.2 MB | `docker pull toolkitbox/mongo` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/mongo?logo=docker)](https://hub.docker.com/r/toolkitbox/mongo) |
+| mysql | `latest`,`v5.6`,`v5.7` | 17.2 MB | `docker pull toolkitbox/mysql` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/mysql?logo=docker)](https://hub.docker.com/r/toolkitbox/mysql) |
+| postgres | `latest`,`v10`,`v11`,`v9.6` | 8.7 MB | `docker pull toolkitbox/postgres` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/postgres?logo=docker)](https://hub.docker.com/r/toolkitbox/postgres) |
+| redis | `latest`,`v4`,`v5` | 9.9 MB | `docker pull toolkitbox/redis` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/redis?logo=docker)](https://hub.docker.com/r/toolkitbox/redis) |
 <!-- TOOLS_TABLE_END -->
 
 ## Overview
