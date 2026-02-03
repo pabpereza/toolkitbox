@@ -9,7 +9,7 @@ A modular Docker image build system for DevOps/SysAdmin tools based on Alpine Li
 <!-- BUNDLE_TABLE_START -->
 | Image | Description | Size | Docker Pull |
 |-------|-------------|------|-------------|
-| all | All tools in one image | - | `docker pull toolkitbox/all:latest` |
+| all | All tools in one image | - | `docker pull toolkitbox/all` |
 <!-- BUNDLE_TABLE_END -->
 
 ### Individual Tools
@@ -17,8 +17,12 @@ A modular Docker image build system for DevOps/SysAdmin tools based on Alpine Li
 <!-- TOOLS_TABLE_START -->
 | Tool | Versions | Size | Docker Pull |
 |------|----------|------|-------------|
-| aws-cli | `latest` | 45.3 MB | `docker pull toolkitbox/aws-cli:latest` |
-| postgres | `latest`,`v11` | 8.7 MB | `docker pull toolkitbox/postgres:latest` |
+| aws-cli | `latest`,`v1` | 45.3 MB | `docker pull toolkitbox/aws-cli` |
+| mariadb | `latest`,`v10.3`,`v10.4` | 17.2 MB | `docker pull toolkitbox/mariadb` |
+| mongo | `latest`,`v3.6`,`v4.4` | 53.2 MB | `docker pull toolkitbox/mongo` |
+| mysql | `latest`,`v5.6`,`v5.7` | 17.2 MB | `docker pull toolkitbox/mysql` |
+| postgres | `latest`,`v10`,`v11`,`v9.6` | 8.7 MB | `docker pull toolkitbox/postgres` |
+| redis | `latest`,`v4`,`v5` | 9.9 MB | `docker pull toolkitbox/redis` |
 <!-- TOOLS_TABLE_END -->
 
 ## Overview
