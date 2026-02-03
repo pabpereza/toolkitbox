@@ -26,10 +26,13 @@ ops-toolchain-assembly/
 ├── components/                  # THE SOURCE OF TRUTH
 │   ├── [tool-name]/             # Kebab-case naming (e.g., postgres-client)
 │   │   ├── install.sh           # REQUIRED for modern versions.
+│   │   ├── README.md            # REQUIRED documentation.
 │   │   └── [version]-legacy/    # OPTIONAL for legacy.
 │   │       └── Dockerfile       # Standalone Dockerfile for legacy.
 ├── bundles/                     # Bundle definitions
-│   ├── [bundle-name].txt        # List of components to include in bundle
+│   ├── [bundle-name]/           # Directory for each bundle
+│   │   ├── components.txt       # List of components to include
+│   │   └── README.md            # Documentation (synced to Docker Hub)
 │   └── README.md                # Bundle documentation
 
 ```
@@ -117,16 +120,29 @@ When asked to support an old version (e.g., MongoDB 3.6), do not use `install.sh
 
 * **`build-allinone.sh`**: Scans `components/` for `install.sh` files, copies them to a build context, and builds `Dockerfile.bundle`.
 * **`build-single.sh`**: Takes a component name, creates a dynamic Dockerfile on the fly injecting the specific `install.sh`, and builds a single image.
-* **`build-bundle.sh`**: Takes a bundle name, reads the corresponding `.txt` file from `bundles/`, and builds an image with only the specified components.
+* **`build-bundle.sh`**: Takes a bundle name, reads the `components.txt` file from `bundles/[bundle-name]/`, and builds an image with only the specified components.
 
 ### D. The Bundle Standard (For Grouped Tools)
 
-Bundles allow grouping related tools into a single image without including all components. Bundle definitions are stored in `bundles/` as `.txt` files.
+Bundles allow grouping related tools into a single image without including all components. Each bundle is defined as a directory in `bundles/` containing two files:
 
-#### Bundle File Format
+1. **`components.txt`** - List of components to include
+2. **`README.md`** - Documentation that will be synced to Docker Hub
+
+#### Bundle Directory Structure
+
+```text
+bundles/
+└── [bundle-name]/
+    ├── components.txt    # List of components to include
+    └── README.md         # Documentation (synced to Docker Hub)
+```
+
+#### components.txt Format
 
 ```text
 # Bundle Name - Brief description of the bundle
+# Contains: Component1, Component2, Component3
 component-name-1
 component-name-2
 component-name-3
@@ -134,29 +150,71 @@ component-name-3
 
 #### Format Rules
 
-1. **File Name:** Use kebab-case (e.g., `cloud.txt`, `databases.txt`).
-2. **Comment Header:** First line must be `# Bundle Name - Brief description`.
+1. **Directory Name:** Use kebab-case (e.g., `cloud`, `databases`).
+2. **Comment Header:** First lines should describe the bundle.
 3. **Component Names:** One component per line, must match directory names in `components/`.
 4. **No Empty Components:** All listed components must have a valid `install.sh`.
 
-#### Example: Cloud Bundle
+#### README.md Standard (For Bundles)
+
+Bundle README.md files follow the same documentation standard as component README.md files, with these adaptations:
+
+```markdown
+# [Bundle Name] Bundle
+
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/pabpereza/toolkitbox)
+[![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/[bundle-name]?logo=docker)](https://hub.docker.com/r/toolkitbox/[bundle-name])
+
+One-line description of the bundle.
+
+## Quick Start
+
+### Docker
+[Examples for all included tools]
+
+### Kubernetes
+[Pod manifest with environment variables for all tools]
+
+---
+
+## Description
+
+Detailed description of the bundle and use cases.
+
+## Included Components
+
+| Component | Tool | Description |
+|-----------|------|-------------|
+| component-1 | `tool-cmd` | Brief description |
+
+## Basic Usage
+
+[Usage examples for each included tool]
+
+## Environment Variables
+
+[Environment variables for all included tools]
+
+## Official Documentation
+
+[Links to official docs for all tools]
+```
+
+#### Example: Cloud Bundle Directory
 
 ```text
+bundles/cloud/
+├── components.txt
+└── README.md
+```
+
+**components.txt:**
+```text
 # Cloud Bundle - Cloud provider CLI tools
+# Contains: AWS CLI, Azure CLI, Google Cloud SDK
 aws-cli
 azure-cli
 gcloud
-```
-
-#### Example: Databases Bundle
-
-```text
-# Databases Bundle - Database client tools
-postgres
-mysql
-mariadb
-mongo
-redis
 ```
 
 #### Building a Bundle Locally
@@ -187,14 +245,17 @@ redis
 
 **Scenario 4: "Create a new bundle for monitoring tools"**
 
-* Create `bundles/monitoring.txt`.
-* Add component names (one per line) that should be included.
+* Create directory `bundles/monitoring/`.
+* Create `bundles/monitoring/components.txt` with component names (one per line).
+* Create `bundles/monitoring/README.md` following the bundle documentation standard.
 * The bundle will be automatically built by the `build-bundles.yml` workflow.
+* The README.md will be synced to Docker Hub by the `sync-dockerhub-descriptions.yml` workflow.
 
 **Scenario 5: "Add a tool to an existing bundle"**
 
-* Edit the corresponding `.txt` file in `bundles/`.
+* Edit the corresponding `components.txt` file in `bundles/[bundle-name]/`.
 * Add the component name on a new line.
+* Update the `README.md` to document the new component.
 * Ensure the component exists in `components/` with a valid `install.sh`.
 
 ## 5. Technical Constraints

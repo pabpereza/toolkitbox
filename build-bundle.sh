@@ -17,9 +17,9 @@ if [ -z "$1" ]; then
     echo "Usage: $0 <bundle-name>"
     echo ""
     echo "Available bundles:"
-    for bundle_file in "$BUNDLES_DIR"/*.txt; do
-        if [ -f "$bundle_file" ]; then
-            bundle_name=$(basename "$bundle_file" .txt)
+    for bundle_dir in "$BUNDLES_DIR"/*/; do
+        if [ -d "$bundle_dir" ] && [ -f "${bundle_dir}components.txt" ]; then
+            bundle_name=$(basename "$bundle_dir")
             echo "  - $bundle_name"
         fi
     done
@@ -27,12 +27,18 @@ if [ -z "$1" ]; then
 fi
 
 BUNDLE_NAME="$1"
-BUNDLE_FILE="$BUNDLES_DIR/${BUNDLE_NAME}.txt"
+BUNDLE_DIR="$BUNDLES_DIR/${BUNDLE_NAME}"
+BUNDLE_FILE="$BUNDLE_DIR/components.txt"
 IMAGE_NAME="toolkitbox/${BUNDLE_NAME}:latest"
 
-# Validate bundle file exists
+# Validate bundle directory and components.txt exist
+if [ ! -d "$BUNDLE_DIR" ]; then
+    echo "ERROR: Bundle directory not found: $BUNDLE_DIR"
+    exit 1
+fi
+
 if [ ! -f "$BUNDLE_FILE" ]; then
-    echo "ERROR: Bundle file not found: $BUNDLE_FILE"
+    echo "ERROR: Components file not found: $BUNDLE_FILE"
     exit 1
 fi
 

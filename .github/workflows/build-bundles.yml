@@ -29,8 +29,10 @@ jobs:
       - name: Discover bundles
         id: discover
         run: |
-          bundles=$(find bundles -name "*.txt" -type f | while read bundle_file; do
-            basename "$bundle_file" .txt
+          bundles=$(find bundles -mindepth 1 -maxdepth 1 -type d | while read bundle_dir; do
+            if [ -f "${bundle_dir}/components.txt" ]; then
+              basename "$bundle_dir"
+            fi
           done | jq -R -s -c 'split("\n") | map(select(length > 0))')
           echo "bundles=$bundles" >> $GITHUB_OUTPUT
           echo "Found bundles: $bundles"
@@ -63,7 +65,7 @@ jobs:
       - name: Prepare build context for ${{ matrix.bundle }}
         run: |
           BUNDLE_NAME="${{ matrix.bundle }}"
-          BUNDLE_FILE="bundles/${BUNDLE_NAME}.txt"
+          BUNDLE_FILE="bundles/${BUNDLE_NAME}/components.txt"
           BUILD_CONTEXT_DIR=".build-context"
           COMPONENTS_DIR="components"
           

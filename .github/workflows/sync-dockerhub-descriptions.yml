@@ -1,19 +1,20 @@
 name: Sync Docker Hub Descriptions
 
 on:
-  # Ejecutar cuando hay cambios en READMEs de componentes o en el README principal
+  # Ejecutar cuando hay cambios en READMEs de componentes, bundles o en el README principal
   push:
     branches:
       - main
     paths:
       - 'components/**/README.md'
+      - 'bundles/**/README.md'
       - 'README.md'
   
   # Permitir ejecución manual
   workflow_dispatch:
 
 jobs:
-  # Primero detectamos qué componentes han cambiado
+  # Primero detectamos qué componentes y bundles han cambiado
   detect-changes:
     runs-on: ubuntu-latest
     permissions:
@@ -22,6 +23,8 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       has_changes: ${{ steps.set-matrix.outputs.has_changes }}
       sync_all_image: ${{ steps.set-matrix.outputs.sync_all_image }}
+      bundles_matrix: ${{ steps.set-matrix.outputs.bundles_matrix }}
+      has_bundle_changes: ${{ steps.set-matrix.outputs.has_bundle_changes }}
     
     steps:
       - name: Checkout repository
@@ -47,7 +50,7 @@ jobs:
               CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT ${{ github.event.before }} ${{ github.sha }} 2>/dev/null || git diff --name-only HEAD~1 HEAD)
             fi
           else
-            # En workflow_dispatch, sincronizar todos los componentes
+            # En workflow_dispatch, sincronizar todos los componentes y bundles
             CHANGED_FILES=""
           fi
           
@@ -55,17 +58,26 @@ jobs:
           echo "$CHANGED_FILES"
           
           COMPONENTS=()
+          BUNDLES=()
           SYNC_ALL_IMAGE="false"
           
           if [ -z "$CHANGED_FILES" ]; then
-            # Manual trigger - sincronizar todos los componentes + imagen all
-            echo ">> Manual trigger - will sync all components and 'all' image"
+            # Manual trigger - sincronizar todos los componentes, bundles + imagen all
+            echo ">> Manual trigger - will sync all components, bundles and 'all' image"
             SYNC_ALL_IMAGE="true"
             for component_dir in components/*/; do
               if [ -d "$component_dir" ]; then
                 component=$(basename "$component_dir")
                 if [ -f "components/${component}/README.md" ]; then
                   COMPONENTS+=("$component")
+                fi
+              fi
+            done
+            for bundle_dir in bundles/*/; do
+              if [ -d "$bundle_dir" ]; then
+                bundle=$(basename "$bundle_dir")
+                if [ -f "bundles/${bundle}/README.md" ]; then
+                  BUNDLES+=("$bundle")
                 fi
               fi
             done
@@ -83,13 +95,18 @@ jobs:
                 COMPONENTS+=("$component")
                 echo ">> Detected change in component: $component"
               fi
+              if [[ "$file" =~ ^bundles/([^/]+)/README\.md$ ]]; then
+                bundle="${BASH_REMATCH[1]}"
+                BUNDLES+=("$bundle")
+                echo ">> Detected change in bundle: $bundle"
+              fi
             done
           fi
           
           # Guardar si hay que sincronizar la imagen 'all'
           echo "sync_all_image=$SYNC_ALL_IMAGE" >> $GITHUB_OUTPUT
           
-          # Construir matriz JSON
+          # Construir matriz JSON para componentes
           if [ ${#COMPONENTS[@]} -eq 0 ]; then
             echo ">> No components to sync"
             echo "has_changes=false" >> $GITHUB_OUTPUT
@@ -100,6 +117,19 @@ jobs:
             echo "matrix={\"component\":$JSON_ARRAY}" >> $GITHUB_OUTPUT
             echo "has_changes=true" >> $GITHUB_OUTPUT
             echo ">> Components to sync: ${COMPONENTS[*]}"
+          fi
+          
+          # Construir matriz JSON para bundles
+          if [ ${#BUNDLES[@]} -eq 0 ]; then
+            echo ">> No bundles to sync"
+            echo "has_bundle_changes=false" >> $GITHUB_OUTPUT
+            echo "bundles_matrix={\"bundle\":[]}" >> $GITHUB_OUTPUT
+          else
+            # Crear JSON array
+            JSON_ARRAY=$(printf '%s\n' "${BUNDLES[@]}" | jq -R . | jq -s -c .)
+            echo "bundles_matrix={\"bundle\":$JSON_ARRAY}" >> $GITHUB_OUTPUT
+            echo "has_bundle_changes=true" >> $GITHUB_OUTPUT
+            echo ">> Bundles to sync: ${BUNDLES[*]}"
           fi
 
   # Job que sincroniza cada componente usando la acción oficial
@@ -146,3 +176,35 @@ jobs:
           repository: toolkitbox/all
           readme-filepath: README.md
           short-description: "DevOps toolkit - All-in-one bundle with multiple CLI tools"
+
+  # Job que sincroniza cada bundle usando la acción oficial
+  sync-bundles:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.has_bundle_changes == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.detect-changes.outputs.bundles_matrix) }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract bundle description
+        id: bundle-info
+        run: |
+          BUNDLE_NAME="${{ matrix.bundle }}"
+          # Extract the first line description from README (after the title)
+          DESCRIPTION=$(sed -n '7p' "bundles/${BUNDLE_NAME}/README.md" | head -c 100)
+          echo "description=${DESCRIPTION}" >> $GITHUB_OUTPUT
+
+      - name: Sync ${{ matrix.bundle }} bundle description to Docker Hub
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: toolkitbox
+          password: ${{ secrets.DOCKER_TOKEN }}
+          repository: toolkitbox/${{ matrix.bundle }}
+          readme-filepath: bundles/${{ matrix.bundle }}/README.md
+          short-description: "DevOps toolkit - ${{ matrix.bundle }} bundle"
