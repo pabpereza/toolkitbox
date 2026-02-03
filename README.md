@@ -9,7 +9,7 @@ A modular Docker image build system for DevOps/SysAdmin tools based on Alpine Li
 <!-- BUNDLE_TABLE_START -->
 | Image | Description | Size | Docker Pull |
 |-------|-------------|------|-------------|
-| all | All tools in one image | - | `docker pull toolkitbox/all` |
+| all | All tools in one image | 103.9 MB | `docker pull toolkitbox/all` |
 <!-- BUNDLE_TABLE_END -->
 
 ### Individual Tools
