@@ -131,3 +131,4 @@ SHOW VARIABLES LIKE '%max_connections%';
 
 - [MySQL Command-Line Client](https://dev.mysql.com/doc/refman/8.0/en/mysql.html)
 - [mysqldump](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html)
+
