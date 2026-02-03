@@ -1,13 +1,12 @@
 # Legacy MongoDB 4.4 Client Image
 #
 # Base: Official MongoDB 4.4 image (extracts only the shell)
-# Note: Using multi-stage to get only mongo shell binary
 
 FROM mongo:4.4 AS source
 
-FROM debian:bullseye-slim
+FROM debian:buster-slim
 
-# Copy MongoDB shell from official image
+# Copy MongoDB tools from official image
 COPY --from=source /usr/bin/mongo /usr/bin/mongo
 COPY --from=source /usr/bin/mongodump /usr/bin/mongodump
 COPY --from=source /usr/bin/mongorestore /usr/bin/mongorestore

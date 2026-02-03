@@ -1,21 +1,19 @@
 # Legacy Redis 5 Client Image
 #
-# Base: Alpine Linux 3.12 (for Redis 5 compatibility)
+# Base: Official Redis 5 image (extracts only the client)
 
-FROM alpine:3.12
+FROM redis:5-alpine AS source
 
-# Install Redis 5 client
-# Alpine 3.12 repositories contain Redis 5.x
-RUN apk add --no-cache \
-    redis \
-    bash \
-    && rm -rf /var/cache/apk/*
+FROM alpine:3.18
+
+# Copy Redis client from official image
+COPY --from=source /usr/local/bin/redis-cli /usr/local/bin/redis-cli
+
+# Install bash
+RUN apk add --no-cache bash
 
 # Verify installation
 RUN redis-cli --version
-
-# Set default shell
-SHELL ["/bin/bash", "-c"]
 
 # Default command
 CMD ["/bin/bash"]

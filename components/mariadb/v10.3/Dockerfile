@@ -1,21 +1,24 @@
 # Legacy MariaDB 10.3 Client Image
 #
-# Base: Alpine Linux 3.10 (for MariaDB 10.3 compatibility)
+# Base: Official MariaDB 10.3 image (extracts only the client)
 
-FROM alpine:3.10
+FROM mariadb:10.3 AS source
 
-# Install MariaDB 10.3 client
-# Alpine 3.10 repositories contain MariaDB 10.3
-RUN apk add --no-cache \
-    mariadb-client \
-    bash \
-    && rm -rf /var/cache/apk/*
+FROM debian:bullseye-slim
+
+# Copy MariaDB client from official image
+COPY --from=source /usr/bin/mysql /usr/bin/mysql
+COPY --from=source /usr/bin/mysqldump /usr/bin/mysqldump
+COPY --from=source /usr/bin/mysqlcheck /usr/bin/mysqlcheck
+COPY --from=source /usr/bin/mysqladmin /usr/bin/mysqladmin
+
+# Install required libraries
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libmariadb3 \
+    && rm -rf /var/lib/apt/lists/*
 
 # Verify installation
 RUN mysql --version
-
-# Set default shell
-SHELL ["/bin/bash", "-c"]
 
 # Default command
 CMD ["/bin/bash"]

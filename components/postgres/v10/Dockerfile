@@ -1,21 +1,26 @@
 # Legacy PostgreSQL 10 Client Image
 #
-# Base: Alpine Linux 3.8 (for PostgreSQL 10 compatibility)
+# Base: Official PostgreSQL 10 image (extracts only the client)
 
-FROM alpine:3.8
+FROM postgres:10-alpine AS source
 
-# Install PostgreSQL 10 client
-# Alpine 3.8 repositories contain PostgreSQL 10
+FROM alpine:3.18
+
+# Copy PostgreSQL client from official image
+COPY --from=source /usr/local/bin/psql /usr/local/bin/psql
+COPY --from=source /usr/local/bin/pg_dump /usr/local/bin/pg_dump
+COPY --from=source /usr/local/bin/pg_restore /usr/local/bin/pg_restore
+COPY --from=source /usr/local/lib/libpq.so* /usr/local/lib/
+
+# Install required libraries
 RUN apk add --no-cache \
-    postgresql-client \
+    libssl1.1 \
+    libcrypto1.1 \
     bash \
-    && rm -rf /var/cache/apk/*
+    && ldconfig /usr/local/lib || true
 
 # Verify installation
 RUN psql --version
-
-# Set default shell
-SHELL ["/bin/bash", "-c"]
 
 # Default command
 CMD ["/bin/bash"]
