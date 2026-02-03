@@ -105,12 +105,42 @@ To add a new tool to the mega image:
 
 That's it! No Dockerfile editing required.
 
+## Automated Docker Hub Description Sync
+
+This repository includes an automated workflow that keeps Docker Hub image descriptions synchronized with component READMEs.
+
+### Workflow: `sync-dockerhub-descriptions.yml`
+
+**Triggers:**
+- Automatically when `components/**/README.md` files are updated in the `main` branch
+- Manually via GitHub Actions UI (workflow_dispatch)
+
+**Functionality:**
+1. Authenticates with Docker Hub API
+2. Iterates through all components in `components/` directory
+3. Updates the Docker Hub description for each image using its README.md content
+
+**Requirements:**
+- `DOCKER_TOKEN` secret must be configured in repository settings
+- Docker Hub repositories must exist before running the workflow
+
+### Updating Component Descriptions
+
+To update a Docker Hub image description:
+
+1. Edit the component's README: `components/{component}/README.md`
+2. Commit and push to the `main` branch
+3. The workflow will automatically sync the description to Docker Hub
+
+The workflow uses the entire README content as the "full description" on Docker Hub, preserving all markdown formatting.
+
 ## Contributing
 When adding new components:
 1. Follow the component guidelines above
 2. Test the installation script in isolation first
 3. Verify the individual and all-in-one image builds successfully
 4. Update documentation if adding complex components
+5. Create a comprehensive README.md in the component directory (it will be synced to Docker Hub)
 
 ## Author
 
