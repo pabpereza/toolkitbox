@@ -71,9 +71,9 @@ jobs:
           echo "all-in-one size: $ALL_SIZE"
           
           # Tamaños de bundles
-          for bundle_def in bundles/*.txt; do
-            if [ -f "$bundle_def" ]; then
-              bundle_name=$(basename "$bundle_def" .txt)
+          for bundle_dir in bundles/*/; do
+            if [ -d "$bundle_dir" ] && [ -f "${bundle_dir}components.txt" ]; then
+              bundle_name=$(basename "$bundle_dir")
               BUNDLE_SIZE=$(get_image_size "toolkitbox/$bundle_name" "latest")
               echo "$BUNDLE_SIZE" > "/tmp/sizes/bundle_$bundle_name"
               echo "$bundle_name bundle size: $BUNDLE_SIZE"
@@ -104,22 +104,23 @@ jobs:
           BADGE="[![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/all?logo=docker)](https://hub.docker.com/r/toolkitbox/all)"
           echo "| all | All tools in one image | all components | $ALL_SIZE | \`docker pull toolkitbox/all\` | $BADGE |" >> "$BUNDLE_FILE"
           
-          # Custom bundles from bundles/*.txt
-          for bundle_def in bundles/*.txt; do
-            if [ ! -f "$bundle_def" ]; then
+          # Custom bundles from bundles/*/
+          for bundle_dir in bundles/*/; do
+            if [ ! -d "$bundle_dir" ] || [ ! -f "${bundle_dir}components.txt" ]; then
               continue
             fi
             
-            bundle_name=$(basename "$bundle_def" .txt)
+            bundle_name=$(basename "$bundle_dir")
+            bundle_file="${bundle_dir}components.txt"
             
             # Extract description from first comment line
-            description=$(grep "^#" "$bundle_def" | head -n1 | sed 's/^# //' | sed 's/ - .*//')
+            description=$(grep "^#" "$bundle_file" | head -n1 | sed 's/^# //' | sed 's/ - .*//')
             if [ -z "$description" ]; then
               description="Bundle: $bundle_name"
             fi
             
             # Get component list
-            components=$(grep -v "^#" "$bundle_def" | grep -v "^$" | tr '\n' ',' | sed 's/,$//' | sed 's/,/, /g')
+            components=$(grep -v "^#" "$bundle_file" | grep -v "^$" | tr '\n' ',' | sed 's/,$//' | sed 's/,/, /g')
             
             # Get bundle size
             BUNDLE_SIZE=$(cat "/tmp/sizes/bundle_$bundle_name" 2>/dev/null || echo "-")
