@@ -1,23 +1,11 @@
 # Legacy PostgreSQL 9.6 Client Image
 #
-# Base: Official PostgreSQL 9.6 image (extracts only the client)
+# Base: Official PostgreSQL 9.6 Alpine image
 
-FROM postgres:9.6-alpine AS source
+FROM postgres:9.6-alpine
 
-FROM alpine:3.18
-
-# Copy PostgreSQL client from official image
-COPY --from=source /usr/local/bin/psql /usr/local/bin/psql
-COPY --from=source /usr/local/bin/pg_dump /usr/local/bin/pg_dump
-COPY --from=source /usr/local/bin/pg_restore /usr/local/bin/pg_restore
-COPY --from=source /usr/local/lib/libpq.so* /usr/local/lib/
-
-# Install required libraries
-RUN apk add --no-cache \
-    libssl1.1 \
-    libcrypto1.1 \
-    bash \
-    && ldconfig /usr/local/lib || true
+# Remove server components to reduce size, keep only client
+RUN rm -f /usr/local/bin/postgres /usr/local/bin/initdb /docker-entrypoint.sh 2>/dev/null || true
 
 # Verify installation
 RUN psql --version

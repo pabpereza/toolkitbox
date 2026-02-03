@@ -1,23 +1,11 @@
 # Legacy MongoDB 4.4 Client Image
 #
-# Base: Official MongoDB 4.4 image (extracts only the shell)
+# Base: Official MongoDB 4.4 image
 
-FROM mongo:4.4 AS source
+FROM mongo:4.4
 
-FROM debian:buster-slim
-
-# Copy MongoDB tools from official image
-COPY --from=source /usr/bin/mongo /usr/bin/mongo
-COPY --from=source /usr/bin/mongodump /usr/bin/mongodump
-COPY --from=source /usr/bin/mongorestore /usr/bin/mongorestore
-COPY --from=source /usr/bin/mongoexport /usr/bin/mongoexport
-COPY --from=source /usr/bin/mongoimport /usr/bin/mongoimport
-
-# Install required libraries
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libcurl4 \
-    libssl1.1 \
-    && rm -rf /var/lib/apt/lists/*
+# Remove server components to reduce size, keep only client tools
+RUN rm -f /usr/bin/mongod /usr/bin/mongos /docker-entrypoint.sh 2>/dev/null || true
 
 # Verify installation
 RUN mongo --version

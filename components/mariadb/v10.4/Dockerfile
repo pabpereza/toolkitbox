@@ -1,21 +1,11 @@
 # Legacy MariaDB 10.4 Client Image
 #
-# Base: Official MariaDB 10.4 image (extracts only the client)
+# Base: Official MariaDB 10.4 image
 
-FROM mariadb:10.4 AS source
+FROM mariadb:10.4
 
-FROM debian:bullseye-slim
-
-# Copy MariaDB client from official image
-COPY --from=source /usr/bin/mysql /usr/bin/mysql
-COPY --from=source /usr/bin/mysqldump /usr/bin/mysqldump
-COPY --from=source /usr/bin/mysqlcheck /usr/bin/mysqlcheck
-COPY --from=source /usr/bin/mysqladmin /usr/bin/mysqladmin
-
-# Install required libraries
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libmariadb3 \
-    && rm -rf /var/lib/apt/lists/*
+# Remove server components to reduce size, keep only client
+RUN rm -f /usr/sbin/mariadbd /usr/sbin/mysqld /docker-entrypoint.sh 2>/dev/null || true
 
 # Verify installation
 RUN mysql --version
