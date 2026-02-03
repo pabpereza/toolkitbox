@@ -102,3 +102,4 @@ mariadb-dump -h hostname -u user -p --no-data database > schema.sql
 
 - [MariaDB Client](https://mariadb.com/kb/en/mariadb-command-line-client/)
 - [mariadb-dump](https://mariadb.com/kb/en/mariadb-dump/)
+
