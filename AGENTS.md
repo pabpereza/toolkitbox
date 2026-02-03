@@ -21,12 +21,16 @@ All agents must strictly adhere to this hierarchy:
 ops-toolchain-assembly/
 ├── build-mega-image.sh          # Orchestrator for bundles (Do not modify logic without approval)
 ├── build-single.sh              # Builder for single components (Template based)
+├── build-bundle.sh              # Builder for custom bundles
 ├── Dockerfile.bundle            # The generic template for the mega-image
 ├── components/                  # THE SOURCE OF TRUTH
 │   ├── [tool-name]/             # Kebab-case naming (e.g., postgres-client)
 │   │   ├── install.sh           # REQUIRED for modern versions.
 │   │   └── [version]-legacy/    # OPTIONAL for legacy.
 │   │       └── Dockerfile       # Standalone Dockerfile for legacy.
+├── bundles/                     # Bundle definitions
+│   ├── [bundle-name].txt        # List of components to include in bundle
+│   └── README.md                # Bundle documentation
 
 ```
 
@@ -113,6 +117,54 @@ When asked to support an old version (e.g., MongoDB 3.6), do not use `install.sh
 
 * **`build-allinone.sh`**: Scans `components/` for `install.sh` files, copies them to a build context, and builds `Dockerfile.bundle`.
 * **`build-single.sh`**: Takes a component name, creates a dynamic Dockerfile on the fly injecting the specific `install.sh`, and builds a single image.
+* **`build-bundle.sh`**: Takes a bundle name, reads the corresponding `.txt` file from `bundles/`, and builds an image with only the specified components.
+
+### D. The Bundle Standard (For Grouped Tools)
+
+Bundles allow grouping related tools into a single image without including all components. Bundle definitions are stored in `bundles/` as `.txt` files.
+
+#### Bundle File Format
+
+```text
+# Bundle Name - Brief description of the bundle
+component-name-1
+component-name-2
+component-name-3
+```
+
+#### Format Rules
+
+1. **File Name:** Use kebab-case (e.g., `cloud.txt`, `databases.txt`).
+2. **Comment Header:** First line must be `# Bundle Name - Brief description`.
+3. **Component Names:** One component per line, must match directory names in `components/`.
+4. **No Empty Components:** All listed components must have a valid `install.sh`.
+
+#### Example: Cloud Bundle
+
+```text
+# Cloud Bundle - Cloud provider CLI tools
+aws-cli
+azure-cli
+gcloud
+```
+
+#### Example: Databases Bundle
+
+```text
+# Databases Bundle - Database client tools
+postgres
+mysql
+mariadb
+mongo
+redis
+```
+
+#### Building a Bundle Locally
+
+```bash
+./build-bundle.sh cloud
+# Produces: toolkitbox/cloud:latest
+```
 
 ## 4. Workflows for Agents
 
@@ -132,6 +184,18 @@ When asked to support an old version (e.g., MongoDB 3.6), do not use `install.sh
 
 * Create `components/python-tools/v2-legacy/Dockerfile`.
 * Use `FROM python:2.7-alpine`.
+
+**Scenario 4: "Create a new bundle for monitoring tools"**
+
+* Create `bundles/monitoring.txt`.
+* Add component names (one per line) that should be included.
+* The bundle will be automatically built by the `build-bundles.yml` workflow.
+
+**Scenario 5: "Add a tool to an existing bundle"**
+
+* Edit the corresponding `.txt` file in `bundles/`.
+* Add the component name on a new line.
+* Ensure the component exists in `components/` with a valid `install.sh`.
 
 ## 5. Technical Constraints
 
