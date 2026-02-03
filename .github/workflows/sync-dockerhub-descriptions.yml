@@ -1,0 +1,106 @@
+name: Sync Docker Hub Descriptions
+
+on:
+  # Ejecutar cuando hay cambios en READMEs de componentes
+  push:
+    branches:
+      - main
+    paths:
+      - 'components/**/README.md'
+  
+  # Permitir ejecución manual
+  workflow_dispatch:
+
+jobs:
+  sync-descriptions:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub and sync descriptions
+        env:
+          DOCKER_USERNAME: toolkitbox
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_TOKEN }}
+        run: |
+          set -e
+          
+          echo ">> Logging in to Docker Hub API..."
+          # Obtener token JWT de Docker Hub
+          TOKEN_RESPONSE=$(curl -s -X POST \
+            -H "Content-Type: application/json" \
+            -d "{\"username\":\"${DOCKER_USERNAME}\",\"password\":\"${DOCKER_PASSWORD}\"}" \
+            https://hub.docker.com/v2/users/login/)
+          
+          JWT_TOKEN=$(echo "$TOKEN_RESPONSE" | jq -r '.token')
+          
+          if [ "$JWT_TOKEN" == "null" ] || [ -z "$JWT_TOKEN" ]; then
+            echo "❌ Error: Failed to authenticate with Docker Hub"
+            echo "Response: $TOKEN_RESPONSE"
+            exit 1
+          fi
+          
+          echo "✓ Successfully authenticated with Docker Hub"
+          
+          # Función para actualizar la descripción de una imagen
+          update_description() {
+            local namespace="$1"
+            local repo="$2"
+            local readme_file="$3"
+            
+            if [ ! -f "$readme_file" ]; then
+              echo "⚠️  Warning: README not found for $namespace/$repo"
+              return
+            fi
+            
+            echo ""
+            echo ">> Updating description for $namespace/$repo..."
+            
+            # Leer el contenido del README
+            DESCRIPTION=$(cat "$readme_file")
+            
+            # Escapar el JSON correctamente
+            DESCRIPTION_JSON=$(jq -n --arg desc "$DESCRIPTION" '{full_description: $desc}')
+            
+            # Actualizar la descripción en Docker Hub
+            RESPONSE=$(curl -s -X PATCH \
+              -H "Authorization: JWT ${JWT_TOKEN}" \
+              -H "Content-Type: application/json" \
+              -d "$DESCRIPTION_JSON" \
+              "https://hub.docker.com/v2/repositories/${namespace}/${repo}/")
+            
+            # Verificar respuesta
+            if echo "$RESPONSE" | jq -e '.name' > /dev/null 2>&1; then
+              echo "✓ Successfully updated $namespace/$repo"
+            else
+              echo "⚠️  Warning: Unexpected response for $namespace/$repo"
+              echo "Response: $RESPONSE"
+            fi
+          }
+          
+          # Iterar por cada componente y actualizar su descripción
+          echo ""
+          echo "=========================================="
+          echo "  Syncing Component Descriptions"
+          echo "=========================================="
+          
+          for component_dir in components/*/; do
+            if [ ! -d "$component_dir" ]; then
+              continue
+            fi
+            
+            component=$(basename "$component_dir")
+            readme_file="${component_dir}README.md"
+            
+            if [ -f "$readme_file" ]; then
+              update_description "toolkitbox" "$component" "$readme_file"
+            else
+              echo "⚠️  Skipping $component (no README.md found)"
+            fi
+          done
+          
+          echo ""
+          echo "=========================================="
+          echo "  Sync completed!"
+          echo "=========================================="
