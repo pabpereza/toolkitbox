@@ -1,0 +1,119 @@
+name: Build Bundle Images
+
+on:
+  # Ejecutar cada semana (domingos a las 00:00 UTC)
+  schedule:
+    - cron: '0 0 * * 6'
+  
+  # Ejecutar cuando hay cambios en bundles o components
+  push:
+    branches:
+      - main
+    paths:
+      - 'bundles/**'
+      - 'components/**'
+  
+  # Permitir ejecución manual
+  workflow_dispatch:
+
+jobs:
+  # Discover all bundle definitions
+  discover-bundles:
+    runs-on: ubuntu-latest
+    outputs:
+      bundles: ${{ steps.discover.outputs.bundles }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Discover bundles
+        id: discover
+        run: |
+          bundles=$(find bundles -name "*.txt" -type f | while read bundle_file; do
+            basename "$bundle_file" .txt
+          done | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "bundles=$bundles" >> $GITHUB_OUTPUT
+          echo "Found bundles: $bundles"
+
+  # Build each bundle in parallel
+  build-bundle:
+    needs: discover-bundles
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        bundle: ${{ fromJson(needs.discover-bundles.outputs.bundles) }}
+      fail-fast: false
+    
+    permissions:
+      contents: read
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: toolkitbox
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Prepare build context for ${{ matrix.bundle }}
+        run: |
+          BUNDLE_NAME="${{ matrix.bundle }}"
+          BUNDLE_FILE="bundles/${BUNDLE_NAME}.txt"
+          BUILD_CONTEXT_DIR=".build-context"
+          COMPONENTS_DIR="components"
+          
+          rm -rf "$BUILD_CONTEXT_DIR"
+          mkdir -p "$BUILD_CONTEXT_DIR"
+          
+          echo ">> Reading bundle: $BUNDLE_NAME"
+          
+          component_count=0
+          while IFS= read -r line || [ -n "$line" ]; do
+            # Skip empty lines and comments
+            line=$(echo "$line" | xargs)
+            if [ -z "$line" ] || [[ "$line" == \#* ]]; then
+              continue
+            fi
+            
+            component_name="$line"
+            install_script="$COMPONENTS_DIR/$component_name/install.sh"
+            
+            if [ -f "$install_script" ]; then
+              target_script="$BUILD_CONTEXT_DIR/${component_name}.sh"
+              cp "$install_script" "$target_script"
+              chmod +x "$target_script"
+              echo "  ✓ Added: $component_name"
+              component_count=$((component_count + 1))
+            else
+              echo "  ✗ Missing: $component_name"
+              exit 1
+            fi
+          done < "$BUNDLE_FILE"
+          
+          echo ">> Components in bundle: $component_count"
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: toolkitbox/${{ matrix.bundle }}
+          tags: |
+            type=raw,value=latest
+            type=raw,value={{date 'YYYYMMDD'}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.bundle
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+

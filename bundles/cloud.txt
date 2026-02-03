@@ -1,0 +1,5 @@
+# Cloud Bundle - Cloud provider CLI tools
+# Contains: AWS CLI, Azure CLI, Google Cloud SDK
+aws-cli
+azure-cli
+gcloud

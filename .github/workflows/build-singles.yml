@@ -3,7 +3,7 @@ name: Build Single Images
 on:
   # Ejecutar cada semana (domingos a las 00:00 UTC) - construye todo
   schedule:
-    - cron: '0 0 * * 0'
+    - cron: '0 0 * * 5'
   
   # Ejecutar cuando hay cambios en components
   push:

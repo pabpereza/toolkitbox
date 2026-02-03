@@ -3,7 +3,7 @@ name: Update README
 on:
   # Ejecutar después de los builds
   workflow_run:
-    workflows: ["Build All-in-One Image", "Build Single Images"]
+    workflows: ["Build All-in-One Image", "Build Single Images", "Build Bundle Images"]
     types:
       - completed
     branches:
@@ -86,13 +86,33 @@ jobs:
         run: |
           BUNDLE_FILE=$(mktemp)
           
-          echo "| Image | Description | Size | Docker Pull | Badges |" > "$BUNDLE_FILE"
-          echo "|-------|-------------|------|-------------|--------|" >> "$BUNDLE_FILE"
+          echo "| Image | Description | Components | Docker Pull | Badges |" > "$BUNDLE_FILE"
+          echo "|-------|-------------|------------|-------------|--------|" >> "$BUNDLE_FILE"
           
-          # All-in-one
-          ALL_SIZE=$(cat /tmp/sizes/all 2>/dev/null || echo "-")
+          # All-in-one bundle
           BADGE="[![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/all?logo=docker)](https://hub.docker.com/r/toolkitbox/all)"
-          echo "| all | All tools in one image | $ALL_SIZE | \`docker pull toolkitbox/all\` | $BADGE |" >> "$BUNDLE_FILE"
+          echo "| all | All tools in one image | all components | \`docker pull toolkitbox/all\` | $BADGE |" >> "$BUNDLE_FILE"
+          
+          # Custom bundles from bundles/*.txt
+          for bundle_def in bundles/*.txt; do
+            if [ ! -f "$bundle_def" ]; then
+              continue
+            fi
+            
+            bundle_name=$(basename "$bundle_def" .txt)
+            
+            # Extract description from first comment line
+            description=$(grep "^#" "$bundle_def" | head -n1 | sed 's/^# //' | sed 's/ - .*//')
+            if [ -z "$description" ]; then
+              description="Bundle: $bundle_name"
+            fi
+            
+            # Get component list
+            components=$(grep -v "^#" "$bundle_def" | grep -v "^$" | tr '\n' ',' | sed 's/,$//' | sed 's/,/, /g')
+            
+            BADGE="[![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/$bundle_name?logo=docker)](https://hub.docker.com/r/toolkitbox/$bundle_name)"
+            echo "| $bundle_name | $description | $components | \`docker pull toolkitbox/$bundle_name\` | $BADGE |" >> "$BUNDLE_FILE"
+          done
           
           cat "$BUNDLE_FILE"
           
