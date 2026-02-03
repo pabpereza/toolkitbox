@@ -20,11 +20,64 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Necesario para comparar commits
+
+      - name: Detect changed READMEs
+        id: detect-changes
+        run: |
+          set -e
+          
+          echo ">> Detecting changed README files..."
+          
+          # Detectar archivos cambiados
+          if [ "${{ github.event_name }}" == "push" ]; then
+            # En push events, comparar con el commit anterior
+            CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} 2>/dev/null || git diff --name-only HEAD~1 HEAD)
+          else
+            # En workflow_dispatch, sincronizar todos los componentes
+            CHANGED_FILES=""
+          fi
+          
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+          
+          # Filtrar solo README.md de componentes y extraer nombres de componentes
+          CHANGED_COMPONENTS=""
+          
+          if [ -z "$CHANGED_FILES" ]; then
+            # Si no hay cambios detectados (manual trigger), sincronizar todos
+            echo ">> Manual trigger or no changed files detected - will sync all components"
+            SYNC_ALL="true"
+          else
+            # Extraer componentes con README.md modificados
+            SYNC_ALL="false"
+            for file in $CHANGED_FILES; do
+              if [[ "$file" =~ ^components/([^/]+)/README\.md$ ]]; then
+                component="${BASH_REMATCH[1]}"
+                CHANGED_COMPONENTS="$CHANGED_COMPONENTS $component"
+                echo ">> Detected change in component: $component"
+              fi
+            done
+            
+            # Si no hay README.md modificados, no sincronizar nada
+            if [ -z "$CHANGED_COMPONENTS" ]; then
+              echo ">> No component README.md files changed"
+              SYNC_ALL="false"
+            fi
+          fi
+          
+          # Guardar en outputs
+          echo "sync_all=$SYNC_ALL" >> $GITHUB_OUTPUT
+          echo "components=$CHANGED_COMPONENTS" >> $GITHUB_OUTPUT
 
       - name: Login to Docker Hub and sync descriptions
+        if: steps.detect-changes.outputs.sync_all == 'true' || steps.detect-changes.outputs.components != ''
         env:
           DOCKER_USERNAME: toolkitbox
           DOCKER_PASSWORD: ${{ secrets.DOCKER_TOKEN }}
+          SYNC_ALL: ${{ steps.detect-changes.outputs.sync_all }}
+          CHANGED_COMPONENTS: ${{ steps.detect-changes.outputs.components }}
         run: |
           set -e
           
@@ -81,26 +134,46 @@ jobs:
             fi
           }
           
-          # Iterar por cada componente y actualizar su descripción
           echo ""
           echo "=========================================="
           echo "  Syncing Component Descriptions"
           echo "=========================================="
           
-          for component_dir in components/*/; do
-            if [ ! -d "$component_dir" ]; then
-              continue
-            fi
+          if [ "$SYNC_ALL" == "true" ]; then
+            # Sincronizar todos los componentes
+            echo ">> Mode: Sync ALL components"
+            echo ""
             
-            component=$(basename "$component_dir")
-            readme_file="${component_dir}README.md"
+            for component_dir in components/*/; do
+              if [ ! -d "$component_dir" ]; then
+                continue
+              fi
+              
+              component=$(basename "$component_dir")
+              readme_file="${component_dir}README.md"
+              
+              if [ -f "$readme_file" ]; then
+                update_description "toolkitbox" "$component" "$readme_file"
+              else
+                echo "⚠️  Skipping $component (no README.md found)"
+              fi
+            done
+          else
+            # Sincronizar solo componentes modificados
+            echo ">> Mode: Sync CHANGED components only"
+            echo ">> Changed components: $CHANGED_COMPONENTS"
+            echo ""
             
-            if [ -f "$readme_file" ]; then
-              update_description "toolkitbox" "$component" "$readme_file"
-            else
-              echo "⚠️  Skipping $component (no README.md found)"
-            fi
-          done
+            for component in $CHANGED_COMPONENTS; do
+              readme_file="components/${component}/README.md"
+              
+              if [ -f "$readme_file" ]; then
+                update_description "toolkitbox" "$component" "$readme_file"
+              else
+                echo "⚠️  Skipping $component (no README.md found)"
+              fi
+            done
+          fi
           
           echo ""
           echo "=========================================="
