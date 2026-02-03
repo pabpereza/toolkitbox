@@ -21,6 +21,8 @@ A modular Docker image build system for DevOps/SysAdmin tools based on Alpine Li
 | Tool | Versions | Size | Docker Pull | Badges |
 |------|----------|------|-------------|--------|
 | aws-cli | `latest`,`v1` | 45.3 MB | `docker pull toolkitbox/aws-cli` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/aws-cli?logo=docker)](https://hub.docker.com/r/toolkitbox/aws-cli) |
+| azure-cli | `latest` | 132.5 MB | `docker pull toolkitbox/azure-cli` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/azure-cli?logo=docker)](https://hub.docker.com/r/toolkitbox/azure-cli) |
+| gcloud | `latest` | 152.1 MB | `docker pull toolkitbox/gcloud` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/gcloud?logo=docker)](https://hub.docker.com/r/toolkitbox/gcloud) |
 | mariadb | `latest`,`v10.3`,`v10.4` | 17.2 MB | `docker pull toolkitbox/mariadb` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/mariadb?logo=docker)](https://hub.docker.com/r/toolkitbox/mariadb) |
 | mongo | `latest`,`v3.6`,`v4.4` | 53.2 MB | `docker pull toolkitbox/mongo` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/mongo?logo=docker)](https://hub.docker.com/r/toolkitbox/mongo) |
 | mysql | `latest`,`v5.6`,`v5.7` | 17.2 MB | `docker pull toolkitbox/mysql` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/mysql?logo=docker)](https://hub.docker.com/r/toolkitbox/mysql) |
