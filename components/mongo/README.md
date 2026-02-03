@@ -1,100 +1,133 @@
 # MongoDB Client (mongosh)
 
-Shell moderno de MongoDB para interactuar con bases de datos MongoDB.
+Modern MongoDB shell for interacting with MongoDB databases.
 
-## Descripción
+## Quick Start
 
-`mongosh` es el shell oficial de MongoDB que reemplaza al antiguo `mongo` shell. Proporciona una interfaz de línea de comandos rica con autocompletado, resaltado de sintaxis y soporte completo para JavaScript.
+### Docker
+```bash
+# Interactive mode
+docker run -it --rm \
+  ghcr.io/pabpereza/toolkitbox/mongo:latest \
+  mongosh "mongodb://my-server:27017"
 
-## Instalación
+# With authentication
+docker run -it --rm \
+  ghcr.io/pabpereza/toolkitbox/mongo:latest \
+  mongosh "mongodb://user:password@my-server:27017/database"
 
-Este componente descarga e instala `mongosh` directamente desde los binarios oficiales de MongoDB. Soporta arquitecturas x64 y arm64.
+# Run single command
+docker run --rm \
+  ghcr.io/pabpereza/toolkitbox/mongo:latest \
+  mongosh "mongodb://my-server:27017" --eval "db.getCollectionNames()"
+```
 
-## Uso básico
+### Kubernetes
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mongo-client
+spec:
+  containers:
+  - name: mongo-client
+    image: ghcr.io/pabpereza/toolkitbox/mongo:latest
+    command: ["sleep", "infinity"]
+    env:
+    - name: MONGODB_URI
+      valueFrom:
+        secretKeyRef:
+          name: mongo-credentials
+          key: uri
+```
 
-### Conectar a MongoDB local
+---
+
+## Description
+
+`mongosh` is the official MongoDB shell that replaces the legacy `mongo` shell. It provides a rich command line interface with autocomplete, syntax highlighting, and full JavaScript support.
+
+## Installation
+
+This component downloads and installs `mongosh` directly from the official MongoDB binaries. Supports x64 and arm64 architectures.
+
+## Basic Usage
+
+### Connect to local MongoDB
 ```bash
 mongosh
 ```
 
-### Conectar a servidor remoto
+### Connect to remote server
 ```bash
 mongosh "mongodb://hostname:27017"
 ```
 
-### Conectar con autenticación
+### Connect with authentication
 ```bash
-mongosh "mongodb://usuario:password@hostname:27017/base_datos"
+mongosh "mongodb://user:password@hostname:27017/database"
 ```
 
-### Conectar a MongoDB Atlas
+### Connect to MongoDB Atlas
 ```bash
-mongosh "mongodb+srv://cluster.mongodb.net/mydb" --username usuario
+mongosh "mongodb+srv://cluster.mongodb.net/mydb" --username user
 ```
 
-### Ejecutar comando y salir
+### Execute command and exit
 ```bash
 mongosh --eval "db.getCollectionNames()"
 ```
 
-### Ejecutar script JavaScript
+### Execute JavaScript script
 ```bash
 mongosh script.js
 ```
 
-## Comandos útiles dentro del shell
+## Useful Shell Commands
 
 ```javascript
-// Mostrar bases de datos
+// Show databases
 show dbs
 
-// Usar base de datos
-use mi_base_datos
+// Use database
+use my_database
 
-// Mostrar colecciones
+// Show collections
 show collections
 
-// Buscar documentos
-db.mi_coleccion.find()
+// Find documents
+db.my_collection.find()
 
-// Insertar documento
-db.mi_coleccion.insertOne({ nombre: "ejemplo" })
+// Insert document
+db.my_collection.insertOne({ name: "example" })
 
-// Buscar con filtro
-db.mi_coleccion.find({ campo: "valor" })
+// Find with filter
+db.my_collection.find({ field: "value" })
 
-// Contar documentos
-db.mi_coleccion.countDocuments()
+// Count documents
+db.my_collection.countDocuments()
 
-// Crear índice
-db.mi_coleccion.createIndex({ campo: 1 })
+// Create index
+db.my_collection.createIndex({ field: 1 })
 ```
 
-## Opciones de conexión
+## Connection Options
 
-| Opción | Descripción |
+| Option | Description |
 |--------|-------------|
-| `--host` | Servidor MongoDB |
-| `--port` | Puerto (por defecto: 27017) |
-| `--username` | Usuario de autenticación |
-| `--password` | Contraseña |
-| `--authenticationDatabase` | Base de datos de autenticación |
-| `--eval` | Ejecutar expresión JavaScript |
+| `--host` | MongoDB server |
+| `--port` | Port (default: 27017) |
+| `--username` | Authentication user |
+| `--password` | Password |
+| `--authenticationDatabase` | Authentication database |
+| `--eval` | Execute JavaScript expression |
 
-## Ejemplo con Docker
+## Available Legacy Versions
 
-```bash
-docker run -it --rm \
-  toolkitbox/mongo \
-  mongosh "mongodb://mi-servidor:27017"
-```
+- `v3.6` - MongoDB 3.6 (uses classic mongo shell)
+- `v4.4` - MongoDB 4.4 (uses classic mongo shell)
 
-## Versiones legacy disponibles
-
-- `v3.6` - MongoDB 3.6 (usa mongo shell clásico)
-- `v4.4` - MongoDB 4.4 (usa mongo shell clásico)
-
-## Documentación oficial
+## Official Documentation
 
 - [MongoDB Shell (mongosh)](https://www.mongodb.com/docs/mongodb-shell/)
 - [CRUD Operations](https://www.mongodb.com/docs/mongodb-shell/crud/)

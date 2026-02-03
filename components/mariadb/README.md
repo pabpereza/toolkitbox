@@ -1,72 +1,104 @@
 # MariaDB Client
 
-Cliente de línea de comandos para MariaDB/MySQL.
+Command line client for MariaDB/MySQL.
 
-## Descripción
+## Quick Start
 
-MariaDB Client (`mariadb` / `mysql`) es la herramienta de línea de comandos para conectarse a servidores MariaDB y MySQL. Permite ejecutar consultas SQL, administrar bases de datos, importar/exportar datos y gestionar usuarios.
-
-## Instalación
-
-Este componente instala `mariadb-client` desde los repositorios de Alpine Linux.
-
-## Uso básico
-
-### Conectar a un servidor
+### Docker
 ```bash
-mariadb -h hostname -u usuario -p
-```
-
-### Conectar especificando base de datos
-```bash
-mariadb -h hostname -u usuario -p nombre_base_datos
-```
-
-### Ejecutar consulta directa
-```bash
-mariadb -h hostname -u usuario -p -e "SELECT * FROM tabla"
-```
-
-### Importar archivo SQL
-```bash
-mariadb -h hostname -u usuario -p base_datos < backup.sql
-```
-
-### Exportar base de datos (dump)
-```bash
-mariadb-dump -h hostname -u usuario -p base_datos > backup.sql
-```
-
-### Exportar solo estructura
-```bash
-mariadb-dump -h hostname -u usuario -p --no-data base_datos > schema.sql
-```
-
-## Opciones comunes
-
-| Opción | Descripción |
-|--------|-------------|
-| `-h, --host` | Servidor al que conectar |
-| `-P, --port` | Puerto (por defecto: 3306) |
-| `-u, --user` | Usuario de conexión |
-| `-p, --password` | Solicitar contraseña |
-| `-D, --database` | Base de datos a seleccionar |
-| `-e, --execute` | Ejecutar comando y salir |
-
-## Ejemplo con Docker
-
-```bash
+# Interactive mode
 docker run -it --rm \
-  toolkitbox/mariadb \
-  mariadb -h mi-servidor.com -u root -p
+  ghcr.io/pabpereza/toolkitbox/mariadb:latest \
+  mariadb -h my-server.com -u root -p
+
+# Run single query
+docker run --rm \
+  ghcr.io/pabpereza/toolkitbox/mariadb:latest \
+  mariadb -h my-server.com -u root -pPASSWORD -e "SHOW DATABASES;"
 ```
 
-## Versiones legacy disponibles
+### Kubernetes
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mariadb-client
+spec:
+  containers:
+  - name: mariadb-client
+    image: ghcr.io/pabpereza/toolkitbox/mariadb:latest
+    command: ["sleep", "infinity"]
+    env:
+    - name: MYSQL_HOST
+      value: "mariadb-service"
+    - name: MYSQL_USER
+      value: "root"
+    - name: MYSQL_PWD
+      valueFrom:
+        secretKeyRef:
+          name: mariadb-credentials
+          key: password
+```
+
+---
+
+## Description
+
+MariaDB Client (`mariadb` / `mysql`) is the command line tool for connecting to MariaDB and MySQL servers. It allows you to execute SQL queries, manage databases, import/export data, and manage users.
+
+## Installation
+
+This component installs `mariadb-client` from the Alpine Linux repositories.
+
+## Basic Usage
+
+### Connect to a server
+```bash
+mariadb -h hostname -u user -p
+```
+
+### Connect specifying database
+```bash
+mariadb -h hostname -u user -p database_name
+```
+
+### Execute direct query
+```bash
+mariadb -h hostname -u user -p -e "SELECT * FROM table"
+```
+
+### Import SQL file
+```bash
+mariadb -h hostname -u user -p database < backup.sql
+```
+
+### Export database (dump)
+```bash
+mariadb-dump -h hostname -u user -p database > backup.sql
+```
+
+### Export structure only
+```bash
+mariadb-dump -h hostname -u user -p --no-data database > schema.sql
+```
+
+## Common Options
+
+| Option | Description |
+|--------|-------------|
+| `-h, --host` | Server to connect to |
+| `-P, --port` | Port (default: 3306) |
+| `-u, --user` | Connection user |
+| `-p, --password` | Prompt for password |
+| `-D, --database` | Database to select |
+| `-e, --execute` | Execute command and exit |
+
+## Available Legacy Versions
 
 - `v10.3` - MariaDB 10.3
 - `v10.4` - MariaDB 10.4
 
-## Documentación oficial
+## Official Documentation
 
 - [MariaDB Client](https://mariadb.com/kb/en/mariadb-command-line-client/)
 - [mariadb-dump](https://mariadb.com/kb/en/mariadb-dump/)

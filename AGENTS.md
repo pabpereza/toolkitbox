@@ -138,3 +138,84 @@ When asked to support an old version (e.g., MongoDB 3.6), do not use `install.sh
 * **OS Base:** Always `alpine` (unless strictly impossible, then `debian-slim` but warn user).
 * **Shell:** Prefer `sh` over `bash` for installers to ensure portability.
 * **User:** Operations run as `root` during build, but images may switch to non-root at the end if required by the tool.
+
+## 6. README Documentation Standard
+
+Every component in `components/[tool-name]/` must have a `README.md` file in English. The structure must follow this exact order:
+
+### Mandatory Structure
+
+```markdown
+# [Tool Name]
+
+One-line description of the tool.
+
+## Quick Start
+
+### Docker
+```bash
+# Interactive mode
+docker run -it --rm \
+  ghcr.io/pabpereza/toolkitbox/[tool-name]:latest \
+  [command]
+
+# Run single command
+docker run --rm \
+  ghcr.io/pabpereza/toolkitbox/[tool-name]:latest \
+  [command] [args]
+```
+
+### Kubernetes
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: [tool-name]-client
+spec:
+  containers:
+  - name: [tool-name]-client
+    image: ghcr.io/pabpereza/toolkitbox/[tool-name]:latest
+    command: ["sleep", "infinity"]
+    env:
+    - name: [ENV_VAR]
+      valueFrom:
+        secretKeyRef:
+          name: [tool-name]-credentials
+          key: [key]
+```
+
+---
+
+## Description
+
+Detailed description of the tool.
+
+## Installation
+
+How the component installs the tool.
+
+## Basic Usage
+
+Common usage examples.
+
+## Common Options
+
+Table of common options.
+
+## Available Legacy Versions (if applicable)
+
+List of legacy versions.
+
+## Official Documentation
+
+Links to official docs.
+```
+
+### Key Rules
+
+1. **Quick Start First:** Docker and Kubernetes examples MUST be the first sections after the title.
+2. **Image Registry:** Always use `ghcr.io/pabpereza/toolkitbox/[tool-name]:latest`.
+3. **Separator:** Use `---` to separate Quick Start from detailed documentation.
+4. **Language:** All documentation must be in English.
+5. **Kubernetes Examples:** Always include a Pod manifest with `sleep infinity` for debugging and environment variables using Secrets.
+6. **Docker Examples:** Include both interactive mode and single command execution.

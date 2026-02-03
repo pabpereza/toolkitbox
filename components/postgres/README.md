@@ -1,123 +1,158 @@
 # PostgreSQL Client
 
-Cliente de línea de comandos para PostgreSQL.
+Command line client for PostgreSQL.
 
-## Descripción
+## Quick Start
 
-PostgreSQL Client incluye `psql`, la herramienta interactiva de terminal para PostgreSQL, junto con utilidades adicionales como `pg_dump`, `pg_restore` y `pg_isready`. Permite ejecutar consultas SQL, gestionar bases de datos y realizar backups.
-
-## Instalación
-
-Este componente instala `postgresql-client` desde los repositorios de Alpine Linux.
-
-## Uso básico
-
-### Conectar a un servidor
+### Docker
 ```bash
-psql -h hostname -U usuario -d base_datos
+# Interactive mode
+docker run -it --rm \
+  -e PGPASSWORD=my_password \
+  ghcr.io/pabpereza/toolkitbox/postgres:latest \
+  psql -h my-server.com -U postgres -d my_database
+
+# Run single query
+docker run --rm \
+  -e PGPASSWORD=my_password \
+  ghcr.io/pabpereza/toolkitbox/postgres:latest \
+  psql -h my-server.com -U postgres -d my_database -c "SELECT version();"
 ```
 
-### Conectar usando URI
-```bash
-psql "postgresql://usuario:password@hostname:5432/base_datos"
+### Kubernetes
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: postgres-client
+spec:
+  containers:
+  - name: postgres-client
+    image: ghcr.io/pabpereza/toolkitbox/postgres:latest
+    command: ["sleep", "infinity"]
+    env:
+    - name: PGHOST
+      value: "postgres-service"
+    - name: PGUSER
+      value: "postgres"
+    - name: PGPASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: postgres-credentials
+          key: password
+    - name: PGDATABASE
+      value: "mydb"
 ```
 
-### Ejecutar consulta directa
+---
+
+## Description
+
+PostgreSQL Client includes `psql`, the interactive terminal tool for PostgreSQL, along with additional utilities like `pg_dump`, `pg_restore`, and `pg_isready`. It allows you to execute SQL queries, manage databases, and perform backups.
+
+## Installation
+
+This component installs `postgresql-client` from the Alpine Linux repositories.
+
+## Basic Usage
+
+### Connect to a server
 ```bash
-psql -h hostname -U usuario -d base_datos -c "SELECT * FROM tabla"
+psql -h hostname -U user -d database
 ```
 
-### Ejecutar script SQL
+### Connect using URI
 ```bash
-psql -h hostname -U usuario -d base_datos -f script.sql
+psql "postgresql://user:password@hostname:5432/database"
 ```
 
-### Exportar base de datos (backup)
+### Execute direct query
 ```bash
-pg_dump -h hostname -U usuario base_datos > backup.sql
+psql -h hostname -U user -d database -c "SELECT * FROM table"
 ```
 
-### Exportar en formato personalizado (comprimido)
+### Execute SQL script
 ```bash
-pg_dump -h hostname -U usuario -Fc base_datos > backup.dump
+psql -h hostname -U user -d database -f script.sql
 ```
 
-### Restaurar backup
+### Export database (backup)
 ```bash
-pg_restore -h hostname -U usuario -d base_datos backup.dump
+pg_dump -h hostname -U user database > backup.sql
 ```
 
-### Verificar conectividad
+### Export in custom format (compressed)
+```bash
+pg_dump -h hostname -U user -Fc database > backup.dump
+```
+
+### Restore backup
+```bash
+pg_restore -h hostname -U user -d database backup.dump
+```
+
+### Check connectivity
 ```bash
 pg_isready -h hostname -p 5432
 ```
 
-## Comandos útiles dentro de psql
+## Useful psql Commands
 
 ```sql
--- Listar bases de datos
+-- List databases
 \l
 
--- Conectar a otra base de datos
-\c nombre_base_datos
+-- Connect to another database
+\c database_name
 
--- Listar tablas
+-- List tables
 \dt
 
--- Describir tabla
-\d nombre_tabla
+-- Describe table
+\d table_name
 
--- Listar usuarios
+-- List users
 \du
 
--- Mostrar ayuda de comandos
+-- Show command help
 \?
 
--- Ejecutar comando del sistema
+-- Execute system command
 \! ls -la
 
--- Salir
+-- Quit
 \q
 ```
 
-## Opciones comunes
+## Common Options
 
-| Opción | Descripción |
+| Option | Description |
 |--------|-------------|
-| `-h, --host` | Servidor al que conectar |
-| `-p, --port` | Puerto (por defecto: 5432) |
-| `-U, --username` | Usuario de conexión |
-| `-d, --dbname` | Base de datos a seleccionar |
-| `-c, --command` | Ejecutar comando SQL y salir |
-| `-f, --file` | Ejecutar comandos desde archivo |
-| `-W, --password` | Forzar solicitud de contraseña |
+| `-h, --host` | Server to connect to |
+| `-p, --port` | Port (default: 5432) |
+| `-U, --username` | Connection user |
+| `-d, --dbname` | Database to select |
+| `-c, --command` | Execute SQL command and exit |
+| `-f, --file` | Execute commands from file |
+| `-W, --password` | Force password prompt |
 
-## Variables de entorno
+## Environment Variables
 
-| Variable | Descripción |
+| Variable | Description |
 |----------|-------------|
-| `PGHOST` | Host del servidor |
-| `PGPORT` | Puerto del servidor |
-| `PGUSER` | Usuario de conexión |
-| `PGPASSWORD` | Contraseña (no recomendado en producción) |
-| `PGDATABASE` | Base de datos por defecto |
+| `PGHOST` | Server host |
+| `PGPORT` | Server port |
+| `PGUSER` | Connection user |
+| `PGPASSWORD` | Password (not recommended in production) |
+| `PGDATABASE` | Default database |
 
-## Ejemplo con Docker
-
-```bash
-docker run -it --rm \
-  -e PGPASSWORD=mi_password \
-  toolkitbox/postgres \
-  psql -h mi-servidor.com -U postgres -d mi_base_datos
-```
-
-## Versiones legacy disponibles
+## Available Legacy Versions
 
 - `v9.6` - PostgreSQL 9.6
 - `v10` - PostgreSQL 10
 - `v11` - PostgreSQL 11
 
-## Documentación oficial
+## Official Documentation
 
 - [psql - PostgreSQL Interactive Terminal](https://www.postgresql.org/docs/current/app-psql.html)
 - [pg_dump](https://www.postgresql.org/docs/current/app-pgdump.html)

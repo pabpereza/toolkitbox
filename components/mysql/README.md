@@ -1,101 +1,133 @@
 # MySQL Client
 
-Cliente de línea de comandos para MySQL.
+Command line client for MySQL.
 
-## Descripción
+## Quick Start
 
-MySQL Client (`mysql`) es la herramienta oficial de línea de comandos para conectarse a servidores MySQL. Permite ejecutar consultas SQL interactivas, scripts, y realizar tareas de administración de bases de datos.
-
-## Instalación
-
-Este componente instala `mysql-client` desde los repositorios de Alpine Linux.
-
-## Uso básico
-
-### Conectar a un servidor
+### Docker
 ```bash
-mysql -h hostname -u usuario -p
+# Interactive mode
+docker run -it --rm \
+  ghcr.io/pabpereza/toolkitbox/mysql:latest \
+  mysql -h my-server.com -u root -p
+
+# Run single query
+docker run --rm \
+  ghcr.io/pabpereza/toolkitbox/mysql:latest \
+  mysql -h my-server.com -u root -pPASSWORD -e "SHOW DATABASES;"
 ```
 
-### Conectar especificando base de datos
-```bash
-mysql -h hostname -u usuario -p nombre_base_datos
+### Kubernetes
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mysql-client
+spec:
+  containers:
+  - name: mysql-client
+    image: ghcr.io/pabpereza/toolkitbox/mysql:latest
+    command: ["sleep", "infinity"]
+    env:
+    - name: MYSQL_HOST
+      value: "mysql-service"
+    - name: MYSQL_USER
+      value: "root"
+    - name: MYSQL_PWD
+      valueFrom:
+        secretKeyRef:
+          name: mysql-credentials
+          key: password
 ```
 
-### Ejecutar consulta directa
+---
+
+## Description
+
+MySQL Client (`mysql`) is the official command line tool for connecting to MySQL servers. It allows you to execute interactive SQL queries, scripts, and perform database administration tasks.
+
+## Installation
+
+This component installs `mysql-client` from the Alpine Linux repositories.
+
+## Basic Usage
+
+### Connect to a server
 ```bash
-mysql -h hostname -u usuario -p -e "SHOW DATABASES;"
+mysql -h hostname -u user -p
 ```
 
-### Importar archivo SQL
+### Connect specifying database
 ```bash
-mysql -h hostname -u usuario -p base_datos < backup.sql
+mysql -h hostname -u user -p database_name
 ```
 
-### Exportar base de datos
+### Execute direct query
 ```bash
-mysqldump -h hostname -u usuario -p base_datos > backup.sql
+mysql -h hostname -u user -p -e "SHOW DATABASES;"
 ```
 
-### Exportar todas las bases de datos
+### Import SQL file
 ```bash
-mysqldump -h hostname -u usuario -p --all-databases > full_backup.sql
+mysql -h hostname -u user -p database < backup.sql
 ```
 
-### Exportar solo estructura (sin datos)
+### Export database
 ```bash
-mysqldump -h hostname -u usuario -p --no-data base_datos > schema.sql
+mysqldump -h hostname -u user -p database > backup.sql
 ```
 
-## Opciones comunes
+### Export all databases
+```bash
+mysqldump -h hostname -u user -p --all-databases > full_backup.sql
+```
 
-| Opción | Descripción |
+### Export structure only (no data)
+```bash
+mysqldump -h hostname -u user -p --no-data database > schema.sql
+```
+
+## Common Options
+
+| Option | Description |
 |--------|-------------|
-| `-h, --host` | Servidor al que conectar |
-| `-P, --port` | Puerto (por defecto: 3306) |
-| `-u, --user` | Usuario de conexión |
-| `-p, --password` | Solicitar contraseña |
-| `-D, --database` | Base de datos a seleccionar |
-| `-e, --execute` | Ejecutar comando y salir |
-| `-N, --skip-column-names` | No mostrar nombres de columnas |
-| `-B, --batch` | Modo batch (sin formato de tabla) |
+| `-h, --host` | Server to connect to |
+| `-P, --port` | Port (default: 3306) |
+| `-u, --user` | Connection user |
+| `-p, --password` | Prompt for password |
+| `-D, --database` | Database to select |
+| `-e, --execute` | Execute command and exit |
+| `-N, --skip-column-names` | Don't show column names |
+| `-B, --batch` | Batch mode (no table formatting) |
 
-## Comandos útiles dentro del cliente
+## Useful Client Commands
 
 ```sql
--- Mostrar bases de datos
+-- Show databases
 SHOW DATABASES;
 
--- Usar base de datos
-USE nombre_base_datos;
+-- Use database
+USE database_name;
 
--- Mostrar tablas
+-- Show tables
 SHOW TABLES;
 
--- Describir estructura de tabla
-DESCRIBE nombre_tabla;
+-- Describe table structure
+DESCRIBE table_name;
 
--- Mostrar procesos activos
+-- Show active processes
 SHOW PROCESSLIST;
 
--- Ver variables del servidor
+-- View server variables
 SHOW VARIABLES LIKE '%max_connections%';
 ```
 
-## Ejemplo con Docker
-
-```bash
-docker run -it --rm \
-  toolkitbox/mysql \
-  mysql -h mi-servidor.com -u root -p
-```
-
-## Versiones legacy disponibles
+## Available Legacy Versions
 
 - `v5.6` - MySQL 5.6
 - `v5.7` - MySQL 5.7
 
-## Documentación oficial
+## Official Documentation
 
 - [MySQL Command-Line Client](https://dev.mysql.com/doc/refman/8.0/en/mysql.html)
 - [mysqldump](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html)

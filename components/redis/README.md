@@ -1,174 +1,207 @@
 # Redis Client
 
-Cliente de línea de comandos para Redis.
+Command line client for Redis.
 
-## Descripción
+## Quick Start
 
-Redis CLI (`redis-cli`) es la herramienta oficial de línea de comandos para interactuar con servidores Redis. Permite ejecutar comandos Redis, gestionar claves, monitorear el servidor y realizar operaciones de administración.
+### Docker
+```bash
+# Interactive mode
+docker run -it --rm \
+  ghcr.io/pabpereza/toolkitbox/redis:latest \
+  redis-cli -h my-server.com -p 6379
 
-## Instalación
+# With authentication
+docker run -it --rm \
+  ghcr.io/pabpereza/toolkitbox/redis:latest \
+  redis-cli -h my-server.com -a PASSWORD
 
-Este componente instala `redis` (que incluye `redis-cli`) desde los repositorios de Alpine Linux.
+# Run single command
+docker run --rm \
+  ghcr.io/pabpereza/toolkitbox/redis:latest \
+  redis-cli -h my-server.com PING
+```
 
-## Uso básico
+### Kubernetes
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: redis-client
+spec:
+  containers:
+  - name: redis-client
+    image: ghcr.io/pabpereza/toolkitbox/redis:latest
+    command: ["sleep", "infinity"]
+    env:
+    - name: REDISCLI_AUTH
+      valueFrom:
+        secretKeyRef:
+          name: redis-credentials
+          key: password
+```
 
-### Conectar a Redis local
+---
+
+## Description
+
+Redis CLI (`redis-cli`) is the official command line tool for interacting with Redis servers. It allows you to execute Redis commands, manage keys, monitor the server, and perform administration operations.
+
+## Installation
+
+This component installs `redis` (which includes `redis-cli`) from the Alpine Linux repositories.
+
+## Basic Usage
+
+### Connect to local Redis
 ```bash
 redis-cli
 ```
 
-### Conectar a servidor remoto
+### Connect to remote server
 ```bash
 redis-cli -h hostname -p 6379
 ```
 
-### Conectar con autenticación
+### Connect with authentication
 ```bash
 redis-cli -h hostname -a password
 ```
 
-### Conectar a Redis con TLS
+### Connect to Redis with TLS
 ```bash
 redis-cli -h hostname --tls
 ```
 
-### Ejecutar comando y salir
+### Execute command and exit
 ```bash
 redis-cli -h hostname PING
 ```
 
-### Ejecutar múltiples comandos desde archivo
+### Execute multiple commands from file
 ```bash
 redis-cli -h hostname < commands.txt
 ```
 
-## Comandos útiles
+## Useful Commands
 
-### Operaciones con strings
+### String operations
 ```bash
-# Establecer valor
-SET clave "valor"
+# Set value
+SET key "value"
 
-# Obtener valor
-GET clave
+# Get value
+GET key
 
-# Establecer con expiración (segundos)
-SETEX clave 3600 "valor"
+# Set with expiration (seconds)
+SETEX key 3600 "value"
 
-# Incrementar contador
-INCR contador
+# Increment counter
+INCR counter
 ```
 
-### Operaciones con listas
+### List operations
 ```bash
-# Agregar a lista
-LPUSH mi_lista "elemento"
-RPUSH mi_lista "elemento"
+# Add to list
+LPUSH my_list "element"
+RPUSH my_list "element"
 
-# Obtener elementos
-LRANGE mi_lista 0 -1
+# Get elements
+LRANGE my_list 0 -1
 
-# Obtener longitud
-LLEN mi_lista
+# Get length
+LLEN my_list
 ```
 
-### Operaciones con hashes
+### Hash operations
 ```bash
-# Establecer campo
-HSET usuario:1 nombre "Juan"
+# Set field
+HSET user:1 name "John"
 
-# Obtener campo
-HGET usuario:1 nombre
+# Get field
+HGET user:1 name
 
-# Obtener todos los campos
-HGETALL usuario:1
+# Get all fields
+HGETALL user:1
 ```
 
-### Operaciones con sets
+### Set operations
 ```bash
-# Agregar a set
-SADD mi_set "elemento"
+# Add to set
+SADD my_set "element"
 
-# Obtener miembros
-SMEMBERS mi_set
+# Get members
+SMEMBERS my_set
 
-# Verificar membresía
-SISMEMBER mi_set "elemento"
+# Check membership
+SISMEMBER my_set "element"
 ```
 
-### Administración
+### Administration
 ```bash
-# Ver todas las claves
+# View all keys
 KEYS *
 
-# Ver claves con patrón
+# View keys with pattern
 KEYS user:*
 
-# Información del servidor
+# Server information
 INFO
 
-# Monitor en tiempo real
+# Real-time monitor
 MONITOR
 
-# Ver clientes conectados
+# View connected clients
 CLIENT LIST
 
-# Obtener configuración
+# Get configuration
 CONFIG GET maxmemory
 ```
 
-## Opciones comunes
+## Common Options
 
-| Opción | Descripción |
+| Option | Description |
 |--------|-------------|
-| `-h` | Hostname del servidor |
-| `-p` | Puerto (por defecto: 6379) |
-| `-a` | Contraseña de autenticación |
-| `-n` | Número de base de datos (0-15) |
-| `--tls` | Habilitar TLS |
-| `--scan` | Usar SCAN en lugar de KEYS |
-| `--bigkeys` | Buscar claves grandes |
-| `--memkeys` | Analizar uso de memoria |
+| `-h` | Server hostname |
+| `-p` | Port (default: 6379) |
+| `-a` | Authentication password |
+| `-n` | Database number (0-15) |
+| `--tls` | Enable TLS |
+| `--scan` | Use SCAN instead of KEYS |
+| `--bigkeys` | Find large keys |
+| `--memkeys` | Analyze memory usage |
 
-## Modos especiales
+## Special Modes
 
-### Modo monitor
+### Monitor mode
 ```bash
 redis-cli MONITOR
 ```
 
-### Modo pub/sub
+### Pub/sub mode
 ```bash
-# Suscribirse a canal
-redis-cli SUBSCRIBE mi_canal
+# Subscribe to channel
+redis-cli SUBSCRIBE my_channel
 
-# Publicar mensaje
-redis-cli PUBLISH mi_canal "mensaje"
+# Publish message
+redis-cli PUBLISH my_channel "message"
 ```
 
-### Análisis de claves
+### Key analysis
 ```bash
-# Buscar claves grandes
+# Find large keys
 redis-cli --bigkeys
 
-# Analizar memoria
+# Analyze memory
 redis-cli --memkeys
 ```
 
-## Ejemplo con Docker
-
-```bash
-docker run -it --rm \
-  toolkitbox/redis \
-  redis-cli -h mi-servidor.com -p 6379
-```
-
-## Versiones legacy disponibles
+## Available Legacy Versions
 
 - `v4` - Redis 4.x
 - `v5` - Redis 5.x
 
-## Documentación oficial
+## Official Documentation
 
 - [Redis CLI](https://redis.io/docs/ui/cli/)
 - [Redis Commands](https://redis.io/commands/)
