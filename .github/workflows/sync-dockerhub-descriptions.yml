@@ -1,12 +1,13 @@
 name: Sync Docker Hub Descriptions
 
 on:
-  # Ejecutar cuando hay cambios en READMEs de componentes
+  # Ejecutar cuando hay cambios en READMEs de componentes o en el README principal
   push:
     branches:
       - main
     paths:
       - 'components/**/README.md'
+      - 'README.md'
   
   # Permitir ejecución manual
   workflow_dispatch:
@@ -20,6 +21,7 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       has_changes: ${{ steps.set-matrix.outputs.has_changes }}
+      sync_all_image: ${{ steps.set-matrix.outputs.sync_all_image }}
     
     steps:
       - name: Checkout repository
@@ -46,10 +48,12 @@ jobs:
           echo "$CHANGED_FILES"
           
           COMPONENTS=()
+          SYNC_ALL_IMAGE="false"
           
           if [ -z "$CHANGED_FILES" ]; then
-            # Manual trigger - sincronizar todos los componentes
-            echo ">> Manual trigger - will sync all components"
+            # Manual trigger - sincronizar todos los componentes + imagen all
+            echo ">> Manual trigger - will sync all components and 'all' image"
+            SYNC_ALL_IMAGE="true"
             for component_dir in components/*/; do
               if [ -d "$component_dir" ]; then
                 component=$(basename "$component_dir")
@@ -59,6 +63,12 @@ jobs:
               fi
             done
           else
+            # Verificar si el README.md de la raíz ha cambiado
+            if echo "$CHANGED_FILES" | grep -q "^README\.md$"; then
+              echo ">> Detected change in root README.md - will sync 'all' image"
+              SYNC_ALL_IMAGE="true"
+            fi
+            
             # Extraer componentes con README.md modificados
             for file in $CHANGED_FILES; do
               if [[ "$file" =~ ^components/([^/]+)/README\.md$ ]]; then
@@ -68,6 +78,9 @@ jobs:
               fi
             done
           fi
+          
+          # Guardar si hay que sincronizar la imagen 'all'
+          echo "sync_all_image=$SYNC_ALL_IMAGE" >> $GITHUB_OUTPUT
           
           # Construir matriz JSON
           if [ ${#COMPONENTS[@]} -eq 0 ]; then
@@ -83,7 +96,7 @@ jobs:
           fi
 
   # Job que sincroniza cada componente usando la acción oficial
-  sync-descriptions:
+  sync-components:
     needs: detect-changes
     if: needs.detect-changes.outputs.has_changes == 'true'
     runs-on: ubuntu-latest
@@ -105,3 +118,24 @@ jobs:
           repository: toolkitbox/${{ matrix.component }}
           readme-filepath: components/${{ matrix.component }}/README.md
           short-description: "DevOps toolkit - ${{ matrix.component }} client"
+
+  # Job que sincroniza la imagen 'all' (bundle con todas las herramientas)
+  sync-all-image:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.sync_all_image == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Sync 'all' bundle description to Docker Hub
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: toolkitbox
+          password: ${{ secrets.DOCKER_TOKEN }}
+          repository: toolkitbox/all
+          readme-filepath: README.md
+          short-description: "DevOps toolkit - All-in-one bundle with multiple CLI tools"
