@@ -1,6 +1,6 @@
 # Toolkitbox 
 
-A modular Docker image build system for DevOps/SysAdmin tools based on Alpine Linux.
+A modular Docker image build system for DevOps/SysAdmin tools and clients. You can use a single image with all tools included, individual images per tool, or bundles grouped by kind of tool. 
 
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/pabpereza/toolkitbox)
 [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/all?logo=docker)](https://hub.docker.com/r/toolkitbox/all)
@@ -10,11 +10,11 @@ A modular Docker image build system for DevOps/SysAdmin tools based on Alpine Li
 ### Bundle Images
 
 <!-- BUNDLE_TABLE_START -->
-| Image | Description | Components | Docker Pull | Badges |
-|-------|-------------|------------|-------------|--------|
-| all | All tools in one image | all components | `docker pull toolkitbox/all` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/all?logo=docker)](https://hub.docker.com/r/toolkitbox/all) |
-| cloud | Cloud provider CLI tools | aws-cli, azure-cli, gcloud | `docker pull toolkitbox/cloud` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/cloud?logo=docker)](https://hub.docker.com/r/toolkitbox/cloud) |
-| databases | Database client tools | postgres, mysql, mariadb, mongo, redis | `docker pull toolkitbox/databases` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/databases?logo=docker)](https://hub.docker.com/r/toolkitbox/databases) |
+| Image | Description | Components | Size | Docker Pull | Badges |
+|-------|-------------|------------|------|-------------|--------|
+| all | All tools in one image | all components | - | `docker pull toolkitbox/all` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/all?logo=docker)](https://hub.docker.com/r/toolkitbox/all) |
+| cloud | Cloud provider CLI tools | aws-cli, azure-cli, gcloud | - | `docker pull toolkitbox/cloud` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/cloud?logo=docker)](https://hub.docker.com/r/toolkitbox/cloud) |
+| databases | Database client tools | postgres, mysql, mariadb, mongo, redis | - | `docker pull toolkitbox/databases` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/databases?logo=docker)](https://hub.docker.com/r/toolkitbox/databases) |
 <!-- BUNDLE_TABLE_END -->
 
 ### Individual Tools

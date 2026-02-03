@@ -70,6 +70,16 @@ jobs:
           echo "$ALL_SIZE" > /tmp/sizes/all
           echo "all-in-one size: $ALL_SIZE"
           
+          # Tamaños de bundles
+          for bundle_def in bundles/*.txt; do
+            if [ -f "$bundle_def" ]; then
+              bundle_name=$(basename "$bundle_def" .txt)
+              BUNDLE_SIZE=$(get_image_size "toolkitbox/$bundle_name" "latest")
+              echo "$BUNDLE_SIZE" > "/tmp/sizes/bundle_$bundle_name"
+              echo "$bundle_name bundle size: $BUNDLE_SIZE"
+            fi
+          done
+          
           # Tamaños de componentes individuales
           for component_dir in components/*/; do
             if [ ! -d "$component_dir" ]; then
@@ -86,12 +96,13 @@ jobs:
         run: |
           BUNDLE_FILE=$(mktemp)
           
-          echo "| Image | Description | Components | Docker Pull | Badges |" > "$BUNDLE_FILE"
-          echo "|-------|-------------|------------|-------------|--------|" >> "$BUNDLE_FILE"
+          echo "| Image | Description | Components | Size | Docker Pull | Badges |" > "$BUNDLE_FILE"
+          echo "|-------|-------------|------------|------|-------------|--------|" >> "$BUNDLE_FILE"
           
           # All-in-one bundle
+          ALL_SIZE=$(cat /tmp/sizes/all 2>/dev/null || echo "-")
           BADGE="[![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/all?logo=docker)](https://hub.docker.com/r/toolkitbox/all)"
-          echo "| all | All tools in one image | all components | \`docker pull toolkitbox/all\` | $BADGE |" >> "$BUNDLE_FILE"
+          echo "| all | All tools in one image | all components | $ALL_SIZE | \`docker pull toolkitbox/all\` | $BADGE |" >> "$BUNDLE_FILE"
           
           # Custom bundles from bundles/*.txt
           for bundle_def in bundles/*.txt; do
@@ -110,8 +121,11 @@ jobs:
             # Get component list
             components=$(grep -v "^#" "$bundle_def" | grep -v "^$" | tr '\n' ',' | sed 's/,$//' | sed 's/,/, /g')
             
+            # Get bundle size
+            BUNDLE_SIZE=$(cat "/tmp/sizes/bundle_$bundle_name" 2>/dev/null || echo "-")
+            
             BADGE="[![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/$bundle_name?logo=docker)](https://hub.docker.com/r/toolkitbox/$bundle_name)"
-            echo "| $bundle_name | $description | $components | \`docker pull toolkitbox/$bundle_name\` | $BADGE |" >> "$BUNDLE_FILE"
+            echo "| $bundle_name | $description | $components | $BUNDLE_SIZE | \`docker pull toolkitbox/$bundle_name\` | $BADGE |" >> "$BUNDLE_FILE"
           done
           
           cat "$BUNDLE_FILE"
