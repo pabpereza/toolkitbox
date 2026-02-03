@@ -1,7 +1,10 @@
 # Redis Client
 
-[![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/pabpereza/toolkitbox)
+[![GitHub Stars](https://img.shields.io/github/stars/pabpereza/toolkitbox?style=flat&logo=github)](https://github.com/pabpereza/toolkitbox)
+[![GitHub Issues](https://img.shields.io/github/issues/pabpereza/toolkitbox?style=flat&logo=github)](https://github.com/pabpereza/toolkitbox/issues)
 [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/redis?logo=docker)](https://hub.docker.com/r/toolkitbox/redis)
+
+> 📢 **Found an issue or want to request a new tool?** [Open an issue on GitHub](https://github.com/pabpereza/toolkitbox/issues)
 
 Command line client for Redis.
 
