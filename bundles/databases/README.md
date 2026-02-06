@@ -6,7 +6,7 @@
 
 > 📢 **Found an issue or want to request a new tool?** [Open an issue on GitHub](https://github.com/pabpereza/toolkitbox/issues)
 
-All-in-one bundle with database client tools for PostgreSQL, MySQL, MariaDB, MongoDB, and Redis.
+All-in-one bundle with database client tools for PostgreSQL, MySQL, MariaDB, MongoDB, Redis, and SQLite.
 
 ## Quick Start
 
@@ -96,6 +96,7 @@ The Databases Bundle is a comprehensive Docker image containing command-line cli
 | mariadb | `mariadb`, `mariadb-dump` | MariaDB client and utilities |
 | mongo | `mongosh` | MongoDB Shell |
 | redis | `redis-cli` | Redis command line interface |
+| sqlite | `sqlite3` | SQLite command line interface |
 
 ## Basic Usage
 
@@ -156,6 +157,18 @@ redis-cli -h hostname -a password
 redis-cli -h hostname PING
 ```
 
+### SQLite
+```bash
+# Open or create database
+sqlite3 mydatabase.db
+
+# Execute query
+sqlite3 mydatabase.db "SELECT * FROM users;"
+
+# Use in-memory database
+sqlite3 :memory:
+```
+
 ## Environment Variables
 
 ### PostgreSQL
@@ -186,3 +199,4 @@ redis-cli -h hostname PING
 - [MariaDB Documentation](https://mariadb.com/kb/en/)
 - [MongoDB Documentation](https://www.mongodb.com/docs/)
 - [Redis Documentation](https://redis.io/docs/)
+- [SQLite Documentation](https://www.sqlite.org/docs.html)
