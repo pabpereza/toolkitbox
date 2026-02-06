@@ -33,6 +33,7 @@ A modular Docker image build system for DevOps/SysAdmin tools and clients. You c
 | mysql | `latest`,`v5.6`,`v5.7` | 17.2 MB | `docker pull toolkitbox/mysql` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/mysql?logo=docker)](https://hub.docker.com/r/toolkitbox/mysql) |
 | postgres | `latest`,`v10`,`v11`,`v9.6` | 8.7 MB | `docker pull toolkitbox/postgres` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/postgres?logo=docker)](https://hub.docker.com/r/toolkitbox/postgres) |
 | redis | `latest`,`v4`,`v5` | 9.9 MB | `docker pull toolkitbox/redis` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/redis?logo=docker)](https://hub.docker.com/r/toolkitbox/redis) |
+| sqlite | `latest`,`v3` | 8.2 MB | `docker pull toolkitbox/sqlite` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/sqlite?logo=docker)](https://hub.docker.com/r/toolkitbox/sqlite) |
 <!-- TOOLS_TABLE_END -->
 
 ## Overview
