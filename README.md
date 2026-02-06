@@ -34,7 +34,16 @@ A modular Docker image build system for DevOps/SysAdmin tools and clients. You c
 | postgres | `latest`,`v10`,`v11`,`v9.6` | 8.7 MB | `docker pull toolkitbox/postgres` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/postgres?logo=docker)](https://hub.docker.com/r/toolkitbox/postgres) |
 | redis | `latest`,`v4`,`v5` | 9.9 MB | `docker pull toolkitbox/redis` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/redis?logo=docker)](https://hub.docker.com/r/toolkitbox/redis) |
 | sqlite | `latest`,`v3` | 8.2 MB | `docker pull toolkitbox/sqlite` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/sqlite?logo=docker)](https://hub.docker.com/r/toolkitbox/sqlite) |
+| duckdb | `v1.4.4` | - | `docker pull toolkitbox/duckdb` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/duckdb?logo=docker)](https://hub.docker.com/r/toolkitbox/duckdb) |
 <!-- TOOLS_TABLE_END -->
+
+### Standalone Only (Not in Bundles)
+
+Some tools require glibc and cannot be included in Alpine-based bundles:
+
+| Tool | Reason | Available As |
+|------|--------|--------------|
+| duckdb | Requires glibc (Alpine uses musl) | Standalone image only |
 
 ## Overview
 This system allows you to dynamically build a "mega image" containing multiple tools without manually editing Dockerfiles. Simply add a new component directory with an `install.sh` script, and the orchestrator automatically includes it in the build.
