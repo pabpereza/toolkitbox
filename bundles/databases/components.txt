@@ -1,7 +1,8 @@
 # Databases Bundle - Database client tools
-# Contains: PostgreSQL, MySQL, MariaDB, MongoDB, Redis
+# Contains: PostgreSQL, MySQL, MariaDB, MongoDB, Redis, SQLite
 postgres
 mysql
 mariadb
 mongo
 redis
+sqlite
