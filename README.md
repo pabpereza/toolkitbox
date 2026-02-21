@@ -16,7 +16,7 @@ A modular Docker image build system for DevOps/SysAdmin tools and clients. You c
 | Image | Description | Components | Size | Docker Pull | Badges |
 |-------|-------------|------------|------|-------------|--------|
 | all | All tools in one image | all components | 340.9 MB | `docker pull toolkitbox/all` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/all?logo=docker)](https://hub.docker.com/r/toolkitbox/all) |
-| cloud | Cloud Bundle | aws-cli, azure-cli, gcloud | 281.3 MB | `docker pull toolkitbox/cloud` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/cloud?logo=docker)](https://hub.docker.com/r/toolkitbox/cloud) |
+| cloud | Cloud Bundle | aws-cli, azure-cli, gcloud | 281.4 MB | `docker pull toolkitbox/cloud` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/cloud?logo=docker)](https://hub.docker.com/r/toolkitbox/cloud) |
 | databases | Databases Bundle | postgres, mysql, mariadb, mongo, redis, sqlite | 67.7 MB | `docker pull toolkitbox/databases` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/databases?logo=docker)](https://hub.docker.com/r/toolkitbox/databases) |
 <!-- BUNDLE_TABLE_END -->
 
