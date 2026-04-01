@@ -1,9 +1,9 @@
 name: Build Single Images
 
 on:
-  # Ejecutar cada semana (domingos a las 00:00 UTC) - construye todo
+  # Ejecutar el primer día de cada mes a las 02:00 UTC - construye todo
   schedule:
-    - cron: '0 0 * * 5'
+    - cron: '0 2 1 * *'
   
   # Ejecutar cuando hay cambios en components
   push:
@@ -135,7 +135,7 @@ jobs:
       - name: Build and push ${{ matrix.component }}:latest
         if: matrix.type == 'install'
         run: |
-          cat <<'EOF' | docker build -t "toolkitbox/${{ matrix.component }}:latest" -f - "components/${{ matrix.component }}"
+          cat > /tmp/Dockerfile.single <<'EOF'
           FROM alpine:latest
           RUN apk add --no-cache bash curl ca-certificates
           COPY install.sh /tmp/install.sh
@@ -143,7 +143,13 @@ jobs:
           WORKDIR /root
           CMD ["/bin/sh"]
           EOF
-          docker push "toolkitbox/${{ matrix.component }}:latest"
+          docker buildx build \
+            --cache-from type=gha,scope=${{ matrix.component }} \
+            --cache-to type=gha,mode=min,scope=${{ matrix.component }} \
+            --push \
+            -t toolkitbox/${{ matrix.component }}:latest \
+            -f /tmp/Dockerfile.single \
+            components/${{ matrix.component }}
 
       # Build para componentes legacy con Dockerfile
       - name: Build and push ${{ matrix.component }}:${{ matrix.version }}
@@ -155,4 +161,4 @@ jobs:
           push: true
           tags: toolkitbox/${{ matrix.component }}:${{ matrix.version }}
           cache-from: type=gha,scope=${{ matrix.component }}-${{ matrix.version }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.component }}-${{ matrix.version }}
+          cache-to: type=gha,mode=min,scope=${{ matrix.component }}-${{ matrix.version }}

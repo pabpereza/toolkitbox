@@ -1,9 +1,9 @@
 name: Build Bundle Images
 
 on:
-  # Ejecutar cada semana (domingos a las 00:00 UTC)
+  # Ejecutar el primer día de cada mes a las 04:00 UTC
   schedule:
-    - cron: '0 0 * * 6'
+    - cron: '0 4 1 * *'
   
   # Ejecutar cuando hay cambios en bundles o components
   push:
@@ -116,6 +116,6 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=bundle-${{ matrix.bundle }}
+          cache-to: type=gha,mode=min,scope=bundle-${{ matrix.bundle }}
 
