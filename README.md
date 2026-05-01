@@ -26,7 +26,7 @@ A modular Docker image build system for DevOps/SysAdmin tools and clients. You c
 | Tool | Versions | Size | Docker Pull | Badges |
 |------|----------|------|-------------|--------|
 | aws-cli | `latest`,`v1` | 45.3 MB | `docker pull toolkitbox/aws-cli` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/aws-cli?logo=docker)](https://hub.docker.com/r/toolkitbox/aws-cli) |
-| azure-cli | `latest` | 134.8 MB | `docker pull toolkitbox/azure-cli` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/azure-cli?logo=docker)](https://hub.docker.com/r/toolkitbox/azure-cli) |
+| azure-cli | `latest` | 132.1 MB | `docker pull toolkitbox/azure-cli` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/azure-cli?logo=docker)](https://hub.docker.com/r/toolkitbox/azure-cli) |
 | duckdb | `v1.4.4` | - | `docker pull toolkitbox/duckdb` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/duckdb?logo=docker)](https://hub.docker.com/r/toolkitbox/duckdb) |
 | gcloud | `latest` | 152.1 MB | `docker pull toolkitbox/gcloud` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/gcloud?logo=docker)](https://hub.docker.com/r/toolkitbox/gcloud) |
 | mariadb | `latest`,`v10.3`,`v10.4` | 17.2 MB | `docker pull toolkitbox/mariadb` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/mariadb?logo=docker)](https://hub.docker.com/r/toolkitbox/mariadb) |
