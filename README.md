@@ -26,9 +26,9 @@ A modular Docker image build system for DevOps/SysAdmin tools and clients. You c
 | Tool | Versions | Size | Docker Pull | Badges |
 |------|----------|------|-------------|--------|
 | aws-cli | `latest`,`v1` | 47.4 MB | `docker pull toolkitbox/aws-cli` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/aws-cli?logo=docker)](https://hub.docker.com/r/toolkitbox/aws-cli) |
-| azure-cli | `latest` | 139.4 MB | `docker pull toolkitbox/azure-cli` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/azure-cli?logo=docker)](https://hub.docker.com/r/toolkitbox/azure-cli) |
+| azure-cli | `latest` | 137.0 MB | `docker pull toolkitbox/azure-cli` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/azure-cli?logo=docker)](https://hub.docker.com/r/toolkitbox/azure-cli) |
 | duckdb | `v1.4.4` | - | `docker pull toolkitbox/duckdb` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/duckdb?logo=docker)](https://hub.docker.com/r/toolkitbox/duckdb) |
-| gcloud | `latest` | 152.6 MB | `docker pull toolkitbox/gcloud` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/gcloud?logo=docker)](https://hub.docker.com/r/toolkitbox/gcloud) |
+| gcloud | `latest` | 152.7 MB | `docker pull toolkitbox/gcloud` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/gcloud?logo=docker)](https://hub.docker.com/r/toolkitbox/gcloud) |
 | mariadb | `latest`,`v10.3`,`v10.4` | 17.7 MB | `docker pull toolkitbox/mariadb` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/mariadb?logo=docker)](https://hub.docker.com/r/toolkitbox/mariadb) |
 | mongo | `latest`,`v3.6`,`v4.4` | 53.1 MB | `docker pull toolkitbox/mongo` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/mongo?logo=docker)](https://hub.docker.com/r/toolkitbox/mongo) |
 | mysql | `latest`,`v5.6`,`v5.7` | 17.7 MB | `docker pull toolkitbox/mysql` | [![Docker Pulls](https://img.shields.io/docker/pulls/toolkitbox/mysql?logo=docker)](https://hub.docker.com/r/toolkitbox/mysql) |
